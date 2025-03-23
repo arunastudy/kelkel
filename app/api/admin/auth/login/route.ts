@@ -18,64 +18,43 @@ export async function POST(request: NextRequest) {
     });
 
     if (!adminSettings) {
-      // Если учетные данные не найдены, используем значения по умолчанию
-      const defaultCredentials = {
-        login: 'admin',
-        password: await bcrypt.hash('admin', 10)
-      };
+      return NextResponse.json(
+        { error: 'Неверный логин или пароль' },
+        { status: 401 }
+      );
+    }
 
-      // Сохраняем значения по умолчанию в базу данных
-      await prisma.settings.create({
-        data: {
-          key: 'admin_credentials',
-          value: JSON.stringify(defaultCredentials)
-        }
-      });
-
-      // Проверяем введенные данные с данными по умолчанию
-      if (login === 'admin' && password === 'admin') {
+    const adminCredentials = JSON.parse(adminSettings.value);
+    
+    // Проверяем логин и пароль
+    if (login === adminCredentials.login) {
+      const isValidPassword = await bcrypt.compare(password, adminCredentials.password);
+      
+      if (isValidPassword) {
         const token = jwt.sign(
           { userId: 'admin', role: 'admin' },
           JWT_SECRET,
           { expiresIn: '24h' }
         );
 
-        const response = NextResponse.json({ success: true });
+        const response = NextResponse.json(
+          { 
+            success: true,
+            redirect: '/admin'
+          },
+          { status: 200 }
+        );
+
+        // Устанавливаем куки с более строгими параметрами
         response.cookies.set('auth_token', token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
+          secure: true,
+          sameSite: 'strict',
           path: '/',
           maxAge: 60 * 60 * 24 // 24 часа
         });
 
         return response;
-      }
-    } else {
-      const adminCredentials = JSON.parse(adminSettings.value);
-      
-      // Проверяем логин и пароль
-      if (login === adminCredentials.login) {
-        const isValidPassword = await bcrypt.compare(password, adminCredentials.password);
-        
-        if (isValidPassword) {
-          const token = jwt.sign(
-            { userId: 'admin', role: 'admin' },
-            JWT_SECRET,
-            { expiresIn: '24h' }
-          );
-
-          const response = NextResponse.json({ success: true });
-          response.cookies.set('auth_token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-            maxAge: 60 * 60 * 24 // 24 часа
-          });
-
-          return response;
-        }
       }
     }
 

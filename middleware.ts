@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { jwtVerify } from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const isAdminPage = request.nextUrl.pathname.startsWith('/admin');
   const isMainAdminPage = request.nextUrl.pathname === '/admin';
   const isApiAuthRoute = request.nextUrl.pathname === '/api/admin/auth/login';
@@ -17,35 +14,16 @@ export async function middleware(request: NextRequest) {
   // Получаем токен из куки
   const token = request.cookies.get('auth_token')?.value;
 
-  // Проверяем токен
-  let isValidToken = false;
-  if (token) {
-    try {
-      const secret = new TextEncoder().encode(JWT_SECRET);
-      await jwtVerify(token, secret);
-      isValidToken = true;
-    } catch (error) {
-      console.error('Invalid token:', error);
-    }
-  }
-
-  // Если это главная страница админки и пользователь не авторизован,
+  // Если это главная страница админки и нет токена,
   // разрешаем доступ для отображения формы входа
-  if (isMainAdminPage && !isValidToken) {
+  if (isMainAdminPage && !token) {
     return NextResponse.next();
   }
 
-  // Для всех остальных маршрутов админки проверяем авторизацию
+  // Для всех остальных маршрутов админки проверяем наличие токена
   if (isAdminPage) {
-    if (!isValidToken) {
-      // Если это API запрос, возвращаем 401
-      if (request.nextUrl.pathname.startsWith('/api/admin')) {
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
-        );
-      }
-      // Для остальных маршрутов перенаправляем на главную страницу админки
+    if (!token) {
+      // Для всех маршрутов перенаправляем на главную страницу админки
       return NextResponse.redirect(new URL('/admin', request.url));
     }
   }

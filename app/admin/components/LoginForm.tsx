@@ -23,27 +23,24 @@ export default function LoginForm() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ login, password }),
-        credentials: 'include' // Важно для работы с куками
+        credentials: 'include'
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         // Очищаем данные корзины
         Cookies.remove('cart');
         localStorage.removeItem('cartPrices');
         localStorage.removeItem('productDetails');
         
-        // Обновляем состояние приложения
-        router.refresh();
-        
-        // Делаем небольшую задержку перед редиректом
-        setTimeout(() => {
-          router.push('/admin');
-        }, 100);
+        // Принудительно обновляем страницу для применения новых куки
+        window.location.href = data.redirect || '/admin';
       } else {
-        const data = await response.json();
         setError(data.error || 'Ошибка при входе');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Ошибка при попытке входа');
     } finally {
       setIsLoading(false);

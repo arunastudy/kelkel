@@ -5,6 +5,7 @@ WORKDIR /app
 # Устанавливаем базовые зависимости
 RUN apk add --no-cache python3
 
+# Копируем файлы зависимостей
 COPY package*.json ./
 COPY prisma ./prisma/
 
@@ -12,12 +13,18 @@ COPY prisma ./prisma/
 RUN npm uninstall bcrypt && npm install bcryptjs
 RUN npm install
 
+# Генерируем Prisma клиент
 RUN npx prisma generate
 
+# Копируем исходный код
 COPY . .
 
-RUN npx prisma generate
+# Очищаем кэш и временные файлы
+RUN rm -rf .next
+RUN npm cache clean --force
 
+# Собираем приложение
 RUN npm run build
 
+# Запускаем приложение
 CMD ["npm", "start"] 
