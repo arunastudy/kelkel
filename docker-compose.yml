@@ -5,11 +5,10 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/apakai?schema=public
-      - JWT_SECRET=ApakaiStore16032025
-      - TELEGRAM_BOT_TOKEN=8003790696:AAHjWQH6nUSmXnlgA-683HcqIa_1t3fBgbI
       - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/apakai?schema=public
     volumes:
+      - .:/app
       - /app/node_modules
       - /app/.next
     depends_on:

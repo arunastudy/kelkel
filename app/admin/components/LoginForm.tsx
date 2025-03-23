@@ -36,7 +36,9 @@ export default function LoginForm() {
         localStorage.removeItem('cartPrices');
         localStorage.removeItem('productDetails');
         
+        // Добавляем редирект на главную страницу админки
         router.refresh();
+        window.location.href = '/admin';
       } else {
         setError(data.error || 'Ошибка при входе');
       }
