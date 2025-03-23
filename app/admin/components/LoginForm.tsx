@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Cookies from 'js-cookie';
 
 export default function LoginForm() {
@@ -24,22 +23,24 @@ export default function LoginForm() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ login, password }),
+        credentials: 'include' // Важно для работы с куками
       });
 
-      const data = await response.json();
-
       if (response.ok) {
-        // Удаляем куки корзины при входе в админку
+        // Очищаем данные корзины
         Cookies.remove('cart');
-        
-        // Удаляем данные из localStorage
         localStorage.removeItem('cartPrices');
         localStorage.removeItem('productDetails');
         
-        // Добавляем редирект на главную страницу админки
+        // Обновляем состояние приложения
         router.refresh();
-        window.location.href = '/admin';
+        
+        // Делаем небольшую задержку перед редиректом
+        setTimeout(() => {
+          router.push('/admin');
+        }, 100);
       } else {
+        const data = await response.json();
         setError(data.error || 'Ошибка при входе');
       }
     } catch (err) {
