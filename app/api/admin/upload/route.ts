@@ -5,12 +5,12 @@ import { generateSlug } from '@/app/utils/helpers';
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file');
     const name = formData.get('name') as string;
 
-    if (!file) {
+    if (!file || !(file instanceof Blob)) {
       return NextResponse.json(
-        { error: 'Файл не найден' },
+        { error: 'Файл не найден или неверный формат' },
         { status: 400 }
       );
     }

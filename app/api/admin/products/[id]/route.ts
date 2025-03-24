@@ -41,7 +41,7 @@ export async function PUT(
     const useDefaultImage = formData.get('useDefaultImage') === 'true';
     
     // Получаем файлы изображений
-    const imageFiles = formData.getAll('images') as File[];
+    const imageFiles = formData.getAll('images');
 
     // Проверяем обязательные поля
     if (!name || isNaN(price) || !categoryId) {
@@ -95,44 +95,49 @@ export async function PUT(
     }
 
     // Обновляем основные данные продукта (без изображений)
-    await prisma.product.update({
+    const updatedProduct = await prisma.product.update({
       where: { id: productId },
       data: {
         name,
         slug,
         description,
         price,
-        isAvailable,
         categoryId,
+        isAvailable
       }
     });
 
-    // Обрабатываем изображения отдельно
     let shouldAddDefaultImage = false;
 
     // Если загружены новые изображения
-    if (imageFiles.length > 0 && imageFiles[0] instanceof File && imageFiles[0].size > 0) {
+    const validImageFiles = imageFiles.filter(file => 
+      file instanceof Blob && file.size > 0
+    );
+
+    if (validImageFiles.length > 0) {
       // Удаляем все существующие изображения
       await prisma.image.deleteMany({
         where: { productId }
       });
 
-      // Загружаем новые изображения
-      for (const file of imageFiles) {
-        if (file instanceof File && file.size > 0) {
-          try {
-            const imageUrl = await saveImage(file, slug);
-            await prisma.image.create({
-              data: {
-                url: imageUrl,
-                productId
-              }
-            });
-          } catch (error) {
-            console.error('Error uploading file:', error);
-          }
+      // Загружаем новые изображения последовательно
+      const uploadPromises = validImageFiles.map(async (file) => {
+        try {
+          const imageUrl = await saveImage(file as Blob, slug);
+          return await prisma.image.create({
+            data: {
+              url: imageUrl,
+              productId
+            }
+          });
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          return null;
         }
-      }
+      });
+
+      // Ждем завершения всех загрузок
+      await Promise.all(uploadPromises);
     } else if (removeDefaultImage) {
       // Если нужно удалить изображение по умолчанию
       await prisma.image.deleteMany({
@@ -174,7 +179,7 @@ export async function PUT(
     }
 
     // Получаем обновленный товар со всеми связанными данными
-    const updatedProduct = await prisma.product.findUnique({
+    const updatedProductWithImages = await prisma.product.findUnique({
       where: { id: productId },
       include: {
         category: true,
@@ -182,7 +187,15 @@ export async function PUT(
       }
     });
 
-    return NextResponse.json(updatedProduct);
+    // Возвращаем ответ с заголовками для отключения кэширования
+    return new NextResponse(JSON.stringify(updatedProductWithImages), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
     console.error('Error updating product:', error);
     return NextResponse.json(

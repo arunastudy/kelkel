@@ -3,11 +3,16 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-export async function saveImage(file: File, slug: string): Promise<string> {
+interface FileWithName extends Blob {
+  name?: string;
+}
+
+export async function saveImage(file: FileWithName, slug: string): Promise<string> {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   
-  const ext = path.extname(file.name).toLowerCase();
+  // Получаем расширение файла из имени или используем .jpg по умолчанию
+  const ext = file.name ? path.extname(file.name).toLowerCase() : '.jpg';
   const fileName = `${slug}${ext}`;
   const publicPath = path.join(process.cwd(), 'public', 'images');
   

@@ -71,7 +71,7 @@ export default function ProductsPage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>('');
   const [searchValue, setSearchValue] = useState('');
   const [filters, setFilters] = useState<FilterParams>({
     search: '',
@@ -95,8 +95,7 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       setIsLoadingProducts(true);
-      setError('');
-      const queryParams = new URLSearchParams({
+      const searchParams = new URLSearchParams({
         search: filters.search,
         categoryId: filters.categoryId,
         availability: filters.availability,
@@ -106,24 +105,25 @@ export default function ProductsPage() {
         perPage: filters.perPage.toString()
       });
 
-      const response = await fetch(`/api/admin/products?${queryParams}`);
+      const response = await fetch(`/api/admin/products?${searchParams}`, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+
       if (!response.ok) {
         throw new Error('Ошибка при загрузке товаров');
       }
+
       const data = await response.json();
-      
-      // Убедимся, что у нас есть все необходимые данные для каждого продукта
-      const processedProducts = (data.products || []).map((product: any) => ({
-        ...product,
-        category: product.category || { name: 'Без категории' },
-        images: product.images || []
-      }));
-      
-      setProducts(processedProducts);
-      setTotalProducts(data.total || processedProducts.length);
+      setProducts(data.products);
+      setTotalProducts(data.total);
+      setError('');
     } catch (error) {
-      console.error('Ошибка при загрузке товаров:', error);
-      setError('Ошибка при загрузке товаров');
+      console.error('Error fetching products:', error);
+      setError(error instanceof Error ? error.message : 'Ошибка при загрузке товаров');
       setProducts([]);
       setTotalProducts(0);
     } finally {
@@ -299,30 +299,50 @@ export default function ProductsPage() {
       const response = await fetch(url, {
         method,
         body: formData,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
       });
-      
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Ошибка при сохранении товара');
+        const error = await response.json();
+        throw new Error(error.error || 'Ошибка при сохранении товара');
       }
+
+      const savedProduct = await response.json();
       
-      // Сбрасываем форму и обновляем список товаров
-      setIsModalOpen(false);
-      setEditingProduct(null);
+      // Обновляем список продуктов
+      setProducts(prevProducts => {
+        if (editingProduct) {
+          // Обновляем существующий продукт
+          return prevProducts.map(p => 
+            p.id === savedProduct.id ? savedProduct : p
+          );
+        } else {
+          // Добавляем новый продукт в начало списка
+          return [savedProduct, ...prevProducts];
+        }
+      });
+
+      // Сбрасываем форму
       setNewProduct({
         name: '',
         slug: '',
         description: '',
         price: 0,
         isAvailable: true,
-        categoryId: '',
+        categoryId: ''
       });
       setSelectedFiles([]);
-      fetchProducts();
+      setIsModalOpen(false);
       
+      // Принудительно обновляем список продуктов с сервера
+      await fetchProducts();
     } catch (error) {
       console.error('Error saving product:', error);
-      alert(error instanceof Error ? error.message : 'Произошла ошибка при сохранении товара');
+      alert(error instanceof Error ? error.message : 'Ошибка при сохранении товара');
     } finally {
       setIsLoading(false);
     }

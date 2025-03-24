@@ -8,9 +8,11 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/apakai?schema=public
     volumes:
-      - .:/app
+      - ./public:/app/public
       - /app/node_modules
       - /app/.next
+      - ./app:/app/app
+      - ./prisma:/app/prisma
     depends_on:
       - db
     restart: always
@@ -36,9 +38,11 @@ services:
       - "80:80"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./public:/app/public:rw
     depends_on:
       - web
     restart: always
+    command: /bin/sh -c 'chmod -R 777 /app/public; find /app/public -type f -exec chmod 644 {} +; nginx -g "daemon off;"'
 
 volumes:
   postgres_data: 

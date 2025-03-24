@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     const removeDefaultImage = formData.get('removeDefaultImage') === 'true';
     
     // Получаем файлы изображений
-    const imageFiles = formData.getAll('images') as File[];
+    const imageFiles = formData.getAll('images');
     
     // Создаем товар
     const product = await prisma.product.create({
@@ -121,27 +121,34 @@ export async function POST(request: NextRequest) {
     });
     
     // Загружаем изображения, если они есть
-    if (imageFiles.length > 0 && imageFiles[0] instanceof File && imageFiles[0].size > 0) {
-      for (const file of imageFiles) {
-        if (file instanceof File && file.size > 0) {
-          try {
-            // Сохраняем файл и получаем URL
-            const imageUrl = await saveImage(file, slug);
-            
-            // Создаем запись об изображении в базе данных
-            await prisma.image.create({
-              data: {
-                url: imageUrl,
-                productId: product.id,
-              },
-            });
-          } catch (error) {
-            console.error('Error uploading file:', error);
-          }
+    const validImageFiles = imageFiles.filter(file => 
+      file instanceof Blob && file.size > 0
+    );
+
+    if (validImageFiles.length > 0) {
+      // Загружаем изображения последовательно
+      const uploadPromises = validImageFiles.map(async (file) => {
+        try {
+          // Сохраняем файл и получаем URL
+          const imageUrl = await saveImage(file as Blob, slug);
+          
+          // Создаем запись об изображении в базе данных
+          return await prisma.image.create({
+            data: {
+              url: imageUrl,
+              productId: product.id,
+            },
+          });
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          return null;
         }
-      }
-    } else {
-      // Если изображения не были загружены, добавляем изображение по умолчанию
+      });
+
+      // Ждем завершения всех загрузок
+      await Promise.all(uploadPromises);
+    } else if (!removeDefaultImage) {
+      // Если изображения не были загружены и не указано удалить дефолтное изображение
       await prisma.image.create({
         data: {
           url: '/images/product-default.png',
@@ -159,7 +166,15 @@ export async function POST(request: NextRequest) {
       }
     });
     
-    return NextResponse.json(updatedProduct);
+    // Возвращаем ответ с заголовками для отключения кэширования
+    return new NextResponse(JSON.stringify(updatedProduct), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
     console.error('Error creating product:', error);
     return NextResponse.json(

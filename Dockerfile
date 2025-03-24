@@ -10,7 +10,8 @@ COPY prisma ./prisma/
 
 # Устанавливаем зависимости
 RUN npm uninstall bcrypt && npm install bcryptjs
-RUN npm install
+RUN npm ci
+RUN npm install sharp
 
 RUN npx prisma generate
 
