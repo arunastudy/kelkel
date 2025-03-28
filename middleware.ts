@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { jwtVerify } from 'jose';
 
-export function middleware(request: NextRequest) {
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+export async function middleware(request: NextRequest) {
   const isAdminPage = request.nextUrl.pathname.startsWith('/admin');
   const isMainAdminPage = request.nextUrl.pathname === '/admin';
   const isApiAuthRoute = request.nextUrl.pathname === '/api/admin/auth/login';
@@ -26,6 +29,17 @@ export function middleware(request: NextRequest) {
       // Для всех маршрутов перенаправляем на главную страницу админки
       return NextResponse.redirect(new URL('/admin', request.url));
     }
+
+    try {
+      // Проверяем валидность токена
+      const secret = new TextEncoder().encode(JWT_SECRET);
+      await jwtVerify(token, secret);
+    } catch (error) {
+      // Если токен невалиден, удаляем его и перенаправляем на страницу входа
+      const response = NextResponse.redirect(new URL('/admin', request.url));
+      response.cookies.delete('auth_token');
+      return response;
+    }
   }
 
   // Получаем текущий язык из cookie
@@ -43,6 +57,8 @@ export function middleware(request: NextRequest) {
     response.cookies.set('preferred_language', language, {
       path: '/',
       maxAge: 60 * 60 * 24 * 365, // 1 год
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production'
     });
   }
 

@@ -42,16 +42,24 @@ export async function POST(request: NextRequest) {
             success: true,
             redirect: '/admin'
           },
-          { status: 200 }
+          { 
+            status: 200,
+            headers: {
+              'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          }
         );
 
         // Устанавливаем куки с более строгими параметрами
         response.cookies.set('auth_token', token, {
           httpOnly: true,
-          secure: true,
-          sameSite: 'strict',
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
           path: '/',
-          maxAge: 60 * 60 * 24 // 24 часа
+          maxAge: 60 * 60 * 24, // 24 часа
+          domain: process.env.NODE_ENV === 'production' ? '62.113.41.23' : undefined
         });
 
         return response;
