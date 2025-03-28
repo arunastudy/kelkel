@@ -1,37 +1,40 @@
-FROM node:18-alpine
+# Этап установки зависимостей
+FROM node:18-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
 
+# Этап сборки
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+# Этап продакшена
+FROM node:18-alpine AS runner
 WORKDIR /app
 
-# Устанавливаем базовые зависимости
-RUN apk add --no-cache python3 make g++
+ENV NODE_ENV production
 
-# Копируем только файлы, необходимые для установки зависимостей
-COPY package*.json ./
-COPY prisma ./prisma/
+# Создаем пользователя для безопасности
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Устанавливаем зависимости
-RUN npm ci --no-audit --no-fund && \
-    npm install sharp --no-audit --no-fund && \
-    npx prisma generate && \
-    npm cache clean --force
+# Копируем необходимые файлы
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-# Копируем остальные файлы
-COPY . .
+# Устанавливаем правильные разрешения
+RUN chown -R nextjs:nodejs /app
 
-# Генерируем Prisma клиент и собираем приложение
-RUN NODE_OPTIONS="--max-old-space-size=1024" npx prisma generate && \
-    NODE_OPTIONS="--max-old-space-size=1024" npm run build
-
-# Очищаем ненужные файлы и кэш
-RUN npm prune --production && \
-    npm cache clean --force && \
-    rm -rf /root/.npm /root/.node-gyp /tmp/*
-
-# Создаем непривилегированного пользователя
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001 && \
-    chown -R nextjs:nodejs /app
-
+# Переключаемся на непривилегированного пользователя
 USER nextjs
 
-CMD ["npm", "start"] 
+# Открываем порт
+EXPOSE 3000
+
+# Запускаем приложение
+CMD ["node", "server.js"] 

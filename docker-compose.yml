@@ -1,66 +1,52 @@
 version: '3.8'
 services:
   web:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
+    restart: always
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/apakai?schema=public
-      - JWT_SECRET=${JWT_SECRET:-your-secret-key}
-    volumes:
-      - ./public:/app/public
-      - /app/node_modules
-      - /app/.next
+      - DATABASE_URL=postgresql://postgres:12345@db:5432/postgres?schema=public
+      - JWT_SECRET=ApakaiStore16032025
+      - NEXTAUTH_URL=http://62.113.41.23
+      - NEXTAUTH_SECRET=ApakaiStore16032025
     depends_on:
       - db
-    restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-        reservations:
-          memory: 1G
+    networks:
+      - app_network
 
   db:
     build:
       context: .
       dockerfile: Dockerfile.postgres
-    ports:
-      - "5433:5432"
+    restart: always
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=apakai
+      - POSTGRES_DB=postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-        reservations:
-          memory: 512M
+    networks:
+      - app_network
 
   nginx:
     image: nginx:alpine
-    ports:
-      - "80:80"
+    restart: always
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./public:/app/public:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    ports:
+      - "80:80"
+      - "443:443"
     depends_on:
       - web
-    restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
+    networks:
+      - app_network
 
 volumes:
   postgres_data:
-  public_files: 
+
+networks:
+  app_network:
+    driver: bridge 
