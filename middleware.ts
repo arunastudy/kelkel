@@ -8,9 +8,10 @@ export async function middleware(request: NextRequest) {
   const isAdminPage = request.nextUrl.pathname.startsWith('/admin');
   const isMainAdminPage = request.nextUrl.pathname === '/admin';
   const isApiAuthRoute = request.nextUrl.pathname === '/api/admin/auth/login';
+  const isLoginPage = request.nextUrl.pathname === '/admin/login';
 
-  // Пропускаем запросы к API авторизации
-  if (isApiAuthRoute) {
+  // Пропускаем запросы к API авторизации и страницу логина
+  if (isApiAuthRoute || isLoginPage) {
     return NextResponse.next();
   }
 
@@ -18,16 +19,15 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value;
 
   // Если это главная страница админки и нет токена,
-  // разрешаем доступ для отображения формы входа
+  // перенаправляем на страницу логина
   if (isMainAdminPage && !token) {
-    return NextResponse.next();
+    return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
   // Для всех остальных маршрутов админки проверяем наличие токена
   if (isAdminPage) {
     if (!token) {
-      // Для всех маршрутов перенаправляем на главную страницу админки
-      return NextResponse.redirect(new URL('/admin', request.url));
+      return NextResponse.redirect(new URL('/admin/login', request.url));
     }
 
     try {
@@ -35,8 +35,8 @@ export async function middleware(request: NextRequest) {
       const secret = new TextEncoder().encode(JWT_SECRET);
       await jwtVerify(token, secret);
     } catch (error) {
-      // Если токен невалиден, удаляем его и перенаправляем на страницу входа
-      const response = NextResponse.redirect(new URL('/admin', request.url));
+      console.error('Invalid token:', error);
+      const response = NextResponse.redirect(new URL('/admin/login', request.url));
       response.cookies.delete('auth_token');
       return response;
     }

@@ -52,14 +52,13 @@ export async function POST(request: NextRequest) {
           }
         );
 
-        // Устанавливаем куки с более строгими параметрами
+        // Устанавливаем куки без domain
         response.cookies.set('auth_token', token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
           path: '/',
-          maxAge: 60 * 60 * 24, // 24 часа
-          domain: process.env.NODE_ENV === 'production' ? '62.113.41.23' : undefined
+          maxAge: 60 * 60 * 24 // 24 часа
         });
 
         return response;
