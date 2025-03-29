@@ -1,27 +1,15 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "package.json",
-      "use": "@vercel/next",
+      "src": "app/**/*.ts",
+      "use": "@vercel/node",
       "config": {
-        "prisma": {
-          "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
-        }
+        "maxDuration": 60,
+        "memory": 1024
       }
     }
   ],
   "env": {
     "PRISMA_GENERATE_DATAPROXY": "true"
-  },
-  "functions": {
-    "app/api/admin/upload/route.ts": {
-      "memory": 1024,
-      "maxDuration": 60
-    },
-    "app/api/upload/route.ts": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
   }
 } 
