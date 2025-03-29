@@ -7,20 +7,10 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const setting = await prisma.settings.findFirst({
-      where: { key: 'telegramId' }
+      where: { key: 'telegram_id' }
     });
 
-    let telegramId = '';
-    if (setting?.value) {
-      try {
-        const data = JSON.parse(setting.value);
-        telegramId = data.value || '';
-      } catch (e) {
-        telegramId = '';
-      }
-    }
-
-    return NextResponse.json({ telegramId });
+    return NextResponse.json({ telegramId: setting?.value || '' });
   } catch (error) {
     console.error('Error getting telegram settings:', error);
     return NextResponse.json(
@@ -75,26 +65,18 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Сохраняем в JSON формате
-    const jsonValue = JSON.stringify({
-      value: cleanTelegramId
-    });
-
     const setting = await prisma.settings.upsert({
-      where: { key: 'telegramId' },
-      update: { value: jsonValue },
+      where: { key: 'telegram_id' },
+      update: { value: cleanTelegramId },
       create: {
-        key: 'telegramId',
-        value: jsonValue
+        key: 'telegram_id',
+        value: cleanTelegramId
       }
     });
 
-    // Парсим значение обратно для ответа
-    const savedData = JSON.parse(setting.value);
-
     return NextResponse.json({
       success: true,
-      telegramId: savedData.value
+      telegramId: setting.value
     });
   } catch (error) {
     console.error('Error updating telegram settings:', error);
