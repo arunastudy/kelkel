@@ -1,64 +1,70 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 // GET /api/admin/settings/credentials
 export async function GET() {
   try {
-    const credentials = await prisma.settings.findUnique({
+    const setting = await prisma.settings.findFirst({
       where: { key: 'admin_credentials' }
     });
 
-    if (!credentials) {
-      return NextResponse.json({ login: 'admin' });
+    if (!setting?.value) {
+      return NextResponse.json({ login: '' });
     }
 
-    const { login } = JSON.parse(credentials.value);
-    return NextResponse.json({ login });
+    const credentials = JSON.parse(setting.value);
+    return NextResponse.json({ login: credentials.login });
   } catch (error) {
-    console.error('Error fetching credentials:', error);
-    return NextResponse.json(
-      { error: 'Ошибка при получении учетных данных' },
-      { status: 500 }
-    );
+    console.error('Error getting credentials:', error);
+    return NextResponse.json({ error: 'Ошибка при получении учетных данных' }, { status: 500 });
   }
 }
 
 // PUT /api/admin/settings/credentials
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
   try {
-    const { login, password } = await request.json();
+    const data = await request.json();
+    const { login, password } = data;
 
-    if (!login || !password) {
-      return NextResponse.json(
-        { error: 'Логин и пароль обязательны' },
-        { status: 400 }
-      );
+    if (!login) {
+      return NextResponse.json({ error: 'Логин не указан' }, { status: 400 });
     }
 
-    // Хешируем пароль
-    const hashedPassword = await hash(password, 10);
+    // Получаем текущие учетные данные
+    const currentSetting = await prisma.settings.findFirst({
+      where: { key: 'admin_credentials' }
+    });
 
-    // Сохраняем учетные данные
-    const credentials = await prisma.settings.upsert({
+    let currentCredentials = { login: '', password: '' };
+    if (currentSetting?.value) {
+      currentCredentials = JSON.parse(currentSetting.value);
+    }
+
+    // Если пароль не предоставлен, используем существующий
+    const hashedPassword = password 
+      ? await bcrypt.hash(password, 10)
+      : currentCredentials.password;
+
+    const credentials = {
+      login,
+      password: hashedPassword
+    };
+
+    await prisma.settings.upsert({
       where: { key: 'admin_credentials' },
-      update: {
-        value: JSON.stringify({ login, password: hashedPassword })
-      },
+      update: { value: JSON.stringify(credentials) },
       create: {
         key: 'admin_credentials',
-        value: JSON.stringify({ login, password: hashedPassword })
+        value: JSON.stringify(credentials)
       }
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error updating credentials:', error);
-    return NextResponse.json(
-      { error: 'Ошибка при обновлении учетных данных' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Ошибка при обновлении учетных данных' }, { status: 500 });
   }
 } 

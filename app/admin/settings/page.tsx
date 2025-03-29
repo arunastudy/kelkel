@@ -43,35 +43,41 @@ export default function SettingsPage() {
     setSuccess('');
 
     try {
+      const promises = [];
+
       // Сохраняем Telegram ID
-      const response = await fetch('/api/admin/settings/telegram', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ telegramId })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Ошибка при обновлении Telegram ID');
+      if (telegramId) {
+        promises.push(
+          fetch('/api/admin/settings/telegram', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ telegramId })
+          })
+        );
       }
 
-      // Если есть пароль, обновляем учетные данные
-      if (password) {
-        const credentialsResponse = await fetch('/api/admin/settings/credentials', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ login, password })
-        });
+      // Сохраняем учетные данные
+      if (login) {
+        promises.push(
+          fetch('/api/admin/settings/credentials', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ login, password })
+          })
+        );
+      }
 
-        const credData = await credentialsResponse.json();
-
-        if (!credentialsResponse.ok) {
-          throw new Error(credData.error || 'Ошибка при обновлении учетных данных');
+      const responses = await Promise.all(promises);
+      
+      // Проверяем ответы на ошибки
+      for (const response of responses) {
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Ошибка при обновлении настроек');
         }
       }
 
