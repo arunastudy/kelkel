@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 // GET /api/admin/settings/telegram
 export async function GET() {
   try {
-    const setting = await prisma.settings.findUnique({
+    const setting = await prisma.settings.findFirst({
       where: { key: 'telegram_id' }
     });
 
@@ -49,25 +49,34 @@ export async function PUT(request: NextRequest) {
 
     const { telegramId } = data;
 
-    if (!telegramId || typeof telegramId !== 'string') {
+    if (!telegramId) {
       return NextResponse.json(
-        { error: 'ID Telegram не указан или имеет неверный формат' },
+        { error: 'ID Telegram не указан' },
+        { status: 400 }
+      );
+    }
+
+    // Очищаем ID от пробелов и проверяем формат
+    const cleanTelegramId = telegramId.toString().trim();
+    if (!/^\d+$/.test(cleanTelegramId)) {
+      return NextResponse.json(
+        { error: 'ID Telegram должен содержать только цифры' },
         { status: 400 }
       );
     }
 
     const setting = await prisma.settings.upsert({
       where: { key: 'telegram_id' },
-      update: { value: telegramId },
+      update: { value: cleanTelegramId },
       create: {
         key: 'telegram_id',
-        value: telegramId
+        value: cleanTelegramId
       }
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      telegramId: setting.value 
+      telegramId: setting.value
     });
   } catch (error) {
     console.error('Error updating telegram settings:', error);

@@ -38,6 +38,17 @@ export default function SettingsPage() {
     }
   };
 
+  const validateTelegramId = (id: string) => {
+    const cleanId = id.trim();
+    if (!cleanId) {
+      throw new Error('ID Telegram не может быть пустым');
+    }
+    if (!/^\d+$/.test(cleanId)) {
+      throw new Error('ID Telegram должен содержать только цифры');
+    }
+    return cleanId;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -45,29 +56,40 @@ export default function SettingsPage() {
     setSuccess('');
 
     try {
+      // Валидация Telegram ID
+      const cleanTelegramId = validateTelegramId(telegramId);
+
       // Сохраняем Telegram ID
       const telegramResponse = await fetch('/api/admin/settings/telegram', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramId })
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ telegramId: cleanTelegramId })
       });
 
+      const telegramData = await telegramResponse.json();
+
       if (!telegramResponse.ok) {
-        const data = await telegramResponse.json();
-        throw new Error(data.error || 'Ошибка при обновлении настроек Telegram');
+        throw new Error(telegramData.error || 'Ошибка при обновлении настроек Telegram');
       }
 
       // Если указан новый пароль, обновляем учетные данные
       if (password) {
         const credentialsResponse = await fetch('/api/admin/settings/credentials', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
           body: JSON.stringify({ login, password })
         });
 
+        const credentialsData = await credentialsResponse.json();
+
         if (!credentialsResponse.ok) {
-          const data = await credentialsResponse.json();
-          throw new Error(data.error || 'Ошибка при обновлении учетных данных');
+          throw new Error(credentialsData.error || 'Ошибка при обновлении учетных данных');
         }
       }
 
@@ -80,6 +102,14 @@ export default function SettingsPage() {
       setError(error instanceof Error ? error.message : 'Ошибка при обновлении настроек');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleTelegramIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Разрешаем только цифры и пробелы при вводе
+    if (/^[\d\s]*$/.test(value)) {
+      setTelegramId(value);
     }
   };
 
@@ -110,12 +140,12 @@ export default function SettingsPage() {
               <input
                 type="text"
                 value={telegramId}
-                onChange={(e) => setTelegramId(e.target.value)}
+                onChange={handleTelegramIdChange}
                 placeholder="123456789"
                 className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
               />
               <p className="mt-1 text-sm text-gray-400">
-                Введите ваш ID Telegram, например: 123456789
+                Введите ваш ID Telegram (только цифры), например: 123456789
               </p>
             </div>
           </div>
