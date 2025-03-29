@@ -24,8 +24,13 @@ export default function LogoutButton() {
       });
 
       if (response.ok) {
-        // Удаляем auth_token куки на клиенте
-        Cookies.remove('auth_token', { path: '/' });
+        // Удаляем auth_token куки на клиенте всеми возможными способами
+        Cookies.remove('auth_token'); // Удаление с дефолтными параметрами
+        Cookies.remove('auth_token', { path: '/' }); // Удаление с указанием пути
+        Cookies.remove('auth_token', { path: '/', domain: window.location.hostname }); // Удаление с указанием домена
+        
+        // Принудительно устанавливаем куки с истекшим сроком действия
+        document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
         
         // Перенаправляем на главную страницу
         window.location.href = '/';
