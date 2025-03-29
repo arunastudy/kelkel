@@ -5,12 +5,17 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const [totalProducts, totalCategories, availableProducts] = await Promise.all([
+    const [totalProducts, totalCategories, availableProducts, unavailableProducts] = await Promise.all([
       prisma.product.count(),
       prisma.category.count(),
       prisma.product.count({
         where: {
           isAvailable: true
+        }
+      }),
+      prisma.product.count({
+        where: {
+          isAvailable: false
         }
       })
     ]);
@@ -18,7 +23,8 @@ export async function GET() {
     return NextResponse.json({
       totalProducts,
       totalCategories,
-      availableProducts
+      availableProducts,
+      unavailableProducts
     });
   } catch (error) {
     console.error('Error fetching stats:', error);

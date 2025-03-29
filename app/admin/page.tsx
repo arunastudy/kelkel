@@ -4,17 +4,24 @@ import { useState, useEffect } from 'react';
 import { 
   ShoppingBagIcon, 
   FolderIcon, 
-  CurrencyDollarIcon,
   CheckCircleIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
+interface Stats {
+  totalProducts: number;
+  totalCategories: number;
+  availableProducts: number;
+  unavailableProducts: number;
+}
+
 export default function AdminPage() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<Stats>({
     totalProducts: 0,
     totalCategories: 0,
     availableProducts: 0,
+    unavailableProducts: 0
   });
   const [currentTime, setCurrentTime] = useState('');
 
@@ -34,8 +41,6 @@ export default function AdminPage() {
       console.error('Error fetching stats:', error);
     }
   };
-
-  const unavailableProducts = stats.totalProducts - stats.availableProducts;
 
   return (
     <div className="space-y-8">
@@ -90,7 +95,7 @@ export default function AdminPage() {
             </span>
           </div>
           <div className="space-y-1">
-            <p className="text-2xl font-bold text-white">{unavailableProducts}</p>
+            <p className="text-2xl font-bold text-white">{stats.unavailableProducts}</p>
             <p className="text-sm text-gray-400">Нет в наличии</p>
           </div>
         </div>
