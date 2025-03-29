@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Cookies from 'js-cookie';
 
 export default function LoginForm() {
@@ -10,6 +10,7 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +35,10 @@ export default function LoginForm() {
         localStorage.removeItem('cartPrices');
         localStorage.removeItem('productDetails');
         
-        // Принудительно обновляем страницу для применения новых куки
-        window.location.href = data.redirect || '/admin';
+        // Перенаправляем на предыдущую страницу или на главную админки
+        const from = searchParams.get('from');
+        router.push(from || '/admin');
+        router.refresh();
       } else {
         setError(data.error || 'Ошибка при входе');
       }

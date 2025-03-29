@@ -18,22 +18,23 @@ export async function middleware(request: NextRequest) {
   // Получаем токен из куки
   const token = request.cookies.get('auth_token')?.value;
 
-  // Если это главная страница админки и нет токена,
-  // перенаправляем на страницу логина
-  if (isMainAdminPage && !token) {
-    return NextResponse.redirect(new URL('/admin/login', request.url));
-  }
-
-  // Для всех остальных маршрутов админки проверяем наличие токена
+  // Для всех маршрутов админки проверяем наличие токена
   if (isAdminPage) {
     if (!token) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+      const url = new URL('/admin/login', request.url);
+      url.searchParams.set('from', request.nextUrl.pathname);
+      return NextResponse.redirect(url);
     }
 
     try {
       // Проверяем валидность токена
       const secret = new TextEncoder().encode(JWT_SECRET);
       await jwtVerify(token, secret);
+      
+      // Если это страница логина и токен валидный, перенаправляем в админку
+      if (isLoginPage) {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      }
     } catch (error) {
       console.error('Invalid token:', error);
       const response = NextResponse.redirect(new URL('/admin/login', request.url));
