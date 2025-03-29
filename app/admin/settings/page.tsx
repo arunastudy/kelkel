@@ -36,6 +36,53 @@ export default function SettingsPage() {
     }
   };
 
+  const saveTelegramId = async () => {
+    try {
+      const response = await fetch('/api/admin/settings/telegram', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ telegramId })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка при обновлении Telegram ID');
+      }
+
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const saveCredentials = async () => {
+    try {
+      // Сохраняем учетные данные только если есть логин
+      if (!login) {
+        throw new Error('Логин обязателен');
+      }
+
+      const response = await fetch('/api/admin/settings/credentials', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ login, password })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка при обновлении учетных данных');
+      }
+
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -43,45 +90,26 @@ export default function SettingsPage() {
     setSuccess('');
 
     try {
-      const promises = [];
+      const updates = [];
 
-      // Сохраняем Telegram ID
+      // Сохраняем Telegram ID если он указан
       if (telegramId) {
-        promises.push(
-          fetch('/api/admin/settings/telegram', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ telegramId })
-          })
-        );
+        updates.push(saveTelegramId());
       }
 
-      // Сохраняем учетные данные
+      // Сохраняем учетные данные если изменился логин или указан новый пароль
       if (login) {
-        promises.push(
-          fetch('/api/admin/settings/credentials', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ login, password })
-          })
-        );
+        updates.push(saveCredentials());
       }
 
-      const responses = await Promise.all(promises);
-      
-      // Проверяем ответы на ошибки
-      for (const response of responses) {
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Ошибка при обновлении настроек');
-        }
+      if (updates.length === 0) {
+        setError('Нет данных для сохранения');
+        return;
       }
 
+      await Promise.all(updates);
       setSuccess('Настройки успешно обновлены');
+      
       if (password) {
         setPassword('');
       }
