@@ -62,14 +62,21 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Функция для удаления изображения из Cloudinary
+// Функция для удаления изображения из Cloudinary через API
 async function deleteImage(url: string) {
   try {
-    // Извлекаем public_id из URL
-    const publicId = url.split('/').slice(-2).join('/').split('.')[0];
-    await cloudinary.uploader.destroy(publicId);
+    const response = await fetch(`/api/admin/cloudinary?url=${encodeURIComponent(url)}`, {
+      method: 'DELETE',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Ошибка при удалении изображения');
+    }
+    
+    return await response.json();
   } catch (error) {
-    console.error('Error deleting image from Cloudinary:', error);
+    console.error('Error deleting image:', error);
+    throw error;
   }
 }
 

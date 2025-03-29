@@ -2,7 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   images: {
-    domains: ['62.113.41.23', 'vercel.app', 'localhost'],
+    domains: ['62.113.41.23', 'vercel.app', 'localhost', 'res.cloudinary.com'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -24,6 +24,18 @@ const nextConfig = {
   },
   swcMinify: true,
   reactStrictMode: true,
+  experimental: {
+    serverActions: true,
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
+    }
+    return config;
+  },
 };
 
 module.exports = nextConfig; 
