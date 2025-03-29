@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { SignJWT } from 'jose';
 
 const prisma = new PrismaClient();
 
@@ -31,11 +31,12 @@ export async function POST(request: NextRequest) {
       const isValidPassword = await bcrypt.compare(password, adminCredentials.password);
       
       if (isValidPassword) {
-        const token = jwt.sign(
-          { userId: 'admin', role: 'admin' },
-          JWT_SECRET,
-          { expiresIn: '24h' }
-        );
+        // Создаем JWT токен с помощью jose
+        const token = await new SignJWT({ userId: 'admin', role: 'admin' })
+          .setProtectedHeader({ alg: 'HS256' })
+          .setIssuedAt()
+          .setExpirationTime('24h')
+          .sign(new TextEncoder().encode(JWT_SECRET));
 
         const response = NextResponse.json(
           { 
@@ -58,7 +59,8 @@ export async function POST(request: NextRequest) {
           httpOnly: true,
           sameSite: 'lax',
           maxAge: 60 * 60 * 24, // 24 часа
-          secure: process.env.NODE_ENV === 'production'
+          secure: process.env.NODE_ENV === 'production',
+          domain: request.headers.get('host')?.split(':')[0] // Получаем домен из заголовка
         });
 
         return response;

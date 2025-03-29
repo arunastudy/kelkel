@@ -10,6 +10,10 @@ export async function middleware(request: NextRequest) {
   const isApiAuthRoute = request.nextUrl.pathname === '/api/admin/auth/login';
   const isLoginPage = request.nextUrl.pathname === '/admin/login';
 
+  // Логируем информацию о запросе
+  console.log('Request path:', request.nextUrl.pathname);
+  console.log('Cookies:', request.cookies.getAll());
+
   // Пропускаем запросы к API авторизации и страницу логина
   if (isApiAuthRoute || isLoginPage) {
     return NextResponse.next();
@@ -17,10 +21,12 @@ export async function middleware(request: NextRequest) {
 
   // Получаем токен из куки
   const token = request.cookies.get('auth_token')?.value;
+  console.log('Auth token:', token);
 
   // Для всех маршрутов админки проверяем наличие токена
   if (isAdminPage) {
     if (!token) {
+      console.log('No auth token found, redirecting to login');
       const url = new URL('/admin/login', request.url);
       url.searchParams.set('from', request.nextUrl.pathname);
       return NextResponse.redirect(url);
@@ -29,14 +35,16 @@ export async function middleware(request: NextRequest) {
     try {
       // Проверяем валидность токена
       const secret = new TextEncoder().encode(JWT_SECRET);
-      await jwtVerify(token, secret);
+      const verified = await jwtVerify(token, secret);
+      console.log('Token verified:', verified);
       
       // Если это страница логина и токен валидный, перенаправляем в админку
       if (isLoginPage) {
+        console.log('Valid token on login page, redirecting to admin');
         return NextResponse.redirect(new URL('/admin', request.url));
       }
     } catch (error) {
-      console.error('Invalid token:', error);
+      console.error('Token verification failed:', error);
       const response = NextResponse.redirect(new URL('/admin/login', request.url));
       response.cookies.delete('auth_token');
       return response;
