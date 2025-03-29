@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
-import { saveImage, DEFAULT_PRODUCT_IMAGE } from '@/app/utils/images';
+import { uploadImage } from '@/app/utils/cloudinary';
+import { DEFAULT_PRODUCT_IMAGE } from '../route';
 
 const prisma = new PrismaClient();
 
@@ -24,7 +25,6 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Получаем FormData вместо JSON
     const formData = await request.formData();
     const productId = params.id;
 
@@ -94,7 +94,7 @@ export async function PUT(
       );
     }
 
-    // Обновляем основные данные продукта (без изображений)
+    // Обновляем основные данные продукта
     const updatedProduct = await prisma.product.update({
       where: { id: productId },
       data: {
@@ -107,8 +107,6 @@ export async function PUT(
       }
     });
 
-    let shouldAddDefaultImage = false;
-
     // Если загружены новые изображения
     const validImageFiles = imageFiles.filter(file => 
       file instanceof Blob && file.size > 0
@@ -120,10 +118,10 @@ export async function PUT(
         where: { productId }
       });
 
-      // Загружаем новые изображения последовательно
-      const uploadPromises = validImageFiles.map(async (file, index) => {
+      // Загружаем новые изображения
+      const uploadPromises = validImageFiles.map(async (file) => {
         try {
-          const imageUrl = await saveImage(file as Blob, name);
+          const imageUrl = await uploadImage(file as Blob, name);
           return await prisma.image.create({
             data: {
               url: imageUrl,
@@ -136,40 +134,13 @@ export async function PUT(
         }
       });
 
-      // Ждем завершения всех загрузок
       await Promise.all(uploadPromises);
-    } else if (removeDefaultImage) {
-      // Если нужно удалить изображение по умолчанию
-      await prisma.image.deleteMany({
-        where: { 
-          productId,
-          url: DEFAULT_PRODUCT_IMAGE
-        }
-      });
-      
-      // Проверяем, остались ли изображения
-      const remainingImages = await prisma.image.count({
-        where: { productId }
-      });
-      
-      // Если изображений не осталось, добавляем изображение по умолчанию
-      if (remainingImages === 0) {
-        shouldAddDefaultImage = true;
-      }
     } else if (useDefaultImage) {
-      // Проверяем, есть ли у товара изображения
-      const imagesCount = await prisma.image.count({
+      // Если нужно использовать изображение по умолчанию
+      await prisma.image.deleteMany({
         where: { productId }
       });
       
-      // Если изображений нет, добавляем изображение по умолчанию
-      if (imagesCount === 0) {
-        shouldAddDefaultImage = true;
-      }
-    }
-    
-    // Добавляем изображение по умолчанию, если нужно
-    if (shouldAddDefaultImage) {
       await prisma.image.create({
         data: {
           url: DEFAULT_PRODUCT_IMAGE,
@@ -187,15 +158,7 @@ export async function PUT(
       }
     });
 
-    // Возвращаем ответ с заголовками для отключения кэширования
-    return new NextResponse(JSON.stringify(updatedProductWithImages), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
-    });
+    return NextResponse.json(updatedProductWithImages);
   } catch (error) {
     console.error('Error updating product:', error);
     return NextResponse.json(

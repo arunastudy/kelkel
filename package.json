@@ -20,6 +20,7 @@
     "@vercel/postgres": "^0.10.0",
     "autoprefixer": "^10.4.17",
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.6.0",
     "jose": "^6.0.10",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",

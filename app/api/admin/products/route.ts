@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
-import { saveImage, DEFAULT_PRODUCT_IMAGE } from '@/app/utils/images';
+import { uploadImage } from '@/app/utils/cloudinary';
+
+export const DEFAULT_PRODUCT_IMAGE = 'https://res.cloudinary.com/dxtwnmoyn/image/upload/v1743237878/products/jaeffxz0u2puc6t7stfu.png';
 
 const prisma = new PrismaClient();
 
@@ -98,7 +100,7 @@ export async function POST(request: NextRequest) {
     
     // Получаем данные товара
     const name = formData.get('name') as string;
-    const slug = formData.get('slug') as string;
+    const slug = formData.get('slug') as string || slugify(name, { lower: true, strict: true });
     const description = formData.get('description') as string;
     const price = parseFloat(formData.get('price') as string);
     const categoryId = formData.get('categoryId') as string;
@@ -127,10 +129,10 @@ export async function POST(request: NextRequest) {
 
     if (validImageFiles.length > 0) {
       // Загружаем изображения последовательно
-      const uploadPromises = validImageFiles.map(async (file, index) => {
+      const uploadPromises = validImageFiles.map(async (file) => {
         try {
-          // Сохраняем файл и получаем URL
-          const imageUrl = await saveImage(file as Blob, name);
+          // Загружаем файл в Cloudinary и получаем URL
+          const imageUrl = await uploadImage(file as Blob, name);
           
           // Создаем запись об изображении в базе данных
           return await prisma.image.create({
@@ -166,15 +168,7 @@ export async function POST(request: NextRequest) {
       }
     });
     
-    // Возвращаем ответ с заголовками для отключения кэширования
-    return new NextResponse(JSON.stringify(updatedProduct), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
-    });
+    return NextResponse.json(updatedProduct);
   } catch (error) {
     console.error('Error creating product:', error);
     return NextResponse.json(
