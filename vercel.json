@@ -1,11 +1,12 @@
 {
   "builds": [
     {
-      "src": "app/**/*.ts",
-      "use": "@vercel/node",
+      "src": "package.json",
+      "use": "@vercel/next",
       "config": {
-        "maxDuration": 60,
-        "memory": 1024
+        "prisma": {
+          "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+        }
       }
     }
   ],
