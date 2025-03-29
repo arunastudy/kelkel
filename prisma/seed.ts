@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
+import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -64,6 +65,23 @@ async function main() {
   await createProducts(smartphones, 5);
   await createProducts(laptops, 5);
   await createProducts(tablets, 5);
+
+  // Хешируем новый пароль
+  const hashedPassword = await hash('admin123', 10);
+  
+  // Обновляем учетные данные администратора
+  await prisma.settings.upsert({
+    where: { key: 'admin_credentials' },
+    update: {
+      value: JSON.stringify({ login: 'admin', password: hashedPassword })
+    },
+    create: {
+      key: 'admin_credentials',
+      value: JSON.stringify({ login: 'admin', password: hashedPassword })
+    }
+  });
+  
+  console.log('Пароль администратора успешно обновлен');
 }
 
 main()
