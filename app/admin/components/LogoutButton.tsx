@@ -21,16 +21,20 @@ export default function LogoutButton() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include' // Важно для работы с httpOnly куками
       });
 
       if (response.ok) {
-        // Удаляем auth_token куки на клиенте всеми возможными способами
-        Cookies.remove('auth_token'); // Удаление с дефолтными параметрами
-        Cookies.remove('auth_token', { path: '/' }); // Удаление с указанием пути
-        Cookies.remove('auth_token', { path: '/', domain: window.location.hostname }); // Удаление с указанием домена
+        // Удаляем auth_token куки на клиенте с правильными параметрами
+        Cookies.remove('auth_token', {
+          path: '/',
+          domain: window.location.hostname,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax'
+        });
         
-        // Принудительно устанавливаем куки с истекшим сроком действия
-        document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+        // Дополнительно пытаемся удалить через document.cookie
+        document.cookie = `auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${window.location.hostname}; secure=${process.env.NODE_ENV === 'production'}; samesite=lax`;
         
         // Перенаправляем на главную страницу
         window.location.href = '/';
