@@ -24,15 +24,17 @@ export default function SettingsPage() {
         fetch('/api/admin/settings/credentials')
       ]);
 
-      if (telegramResponse.ok) {
-        const telegramData = await telegramResponse.json();
-        setTelegramId(telegramData.telegramId || '');
+      if (!telegramResponse.ok || !loginResponse.ok) {
+        throw new Error('Ошибка при загрузке настроек');
       }
 
-      if (loginResponse.ok) {
-        const loginData = await loginResponse.json();
-        setLogin(loginData.login || '');
-      }
+      const [telegramData, loginData] = await Promise.all([
+        telegramResponse.json(),
+        loginResponse.json()
+      ]);
+
+      setTelegramId(telegramData.telegramId || '');
+      setLogin(loginData.login || '');
     } catch (error) {
       console.error('Error fetching settings:', error);
       setError('Ошибка при загрузке настроек');
@@ -41,6 +43,11 @@ export default function SettingsPage() {
 
   const handleTelegramSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!telegramId) {
+      setError('Введите ID Telegram');
+      return;
+    }
+
     setIsLoading(prev => ({ ...prev, telegram: true }));
     setError('');
     setSuccess('');
@@ -54,10 +61,9 @@ export default function SettingsPage() {
         body: JSON.stringify({ telegramId })
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Ошибка при обновлении Telegram ID');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Ошибка при обновлении Telegram ID');
       }
 
       setSuccess('Telegram ID успешно обновлен');
@@ -71,6 +77,11 @@ export default function SettingsPage() {
 
   const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!login) {
+      setError('Введите логин');
+      return;
+    }
+
     setIsLoading(prev => ({ ...prev, credentials: true }));
     setError('');
     setSuccess('');
@@ -84,10 +95,9 @@ export default function SettingsPage() {
         body: JSON.stringify({ login, password })
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Ошибка при обновлении учетных данных');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Ошибка при обновлении учетных данных');
       }
 
       setSuccess('Учетные данные успешно обновлены');
