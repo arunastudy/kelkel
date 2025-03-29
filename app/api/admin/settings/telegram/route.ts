@@ -27,8 +27,8 @@ export async function GET() {
   }
 }
 
-// PUT /api/admin/settings/telegram
-export async function PUT(request: NextRequest) {
+// POST /api/admin/settings/telegram
+export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const telegramId = formData.get('telegramId');

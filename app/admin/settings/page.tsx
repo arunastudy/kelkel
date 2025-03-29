@@ -57,7 +57,7 @@ export default function SettingsPage() {
       formData.append('telegramId', telegramId);
 
       const response = await fetch('/api/admin/settings/telegram', {
-        method: 'PUT',
+        method: 'POST',
         body: formData
       });
 
@@ -66,7 +66,12 @@ export default function SettingsPage() {
         throw new Error(errorText || 'Ошибка при обновлении Telegram ID');
       }
 
-      setSuccess('Telegram ID успешно обновлен');
+      const responseText = await response.text();
+      if (responseText === 'ok') {
+        setSuccess('Telegram ID успешно обновлен');
+      } else {
+        throw new Error('Неожиданный ответ от сервера');
+      }
     } catch (error) {
       console.error('Error updating telegram ID:', error);
       setError(error instanceof Error ? error.message : 'Ошибка при обновлении Telegram ID');
