@@ -1,27 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
-import { uploadImage } from '@/app/utils/cloudinary';
 import { DEFAULT_PRODUCT_IMAGE } from '../route';
 
 const prisma = new PrismaClient();
 
-interface ProductImage {
-  url: string;
-}
-
-interface ProductData {
-  name: string;
-  description: string;
-  price: number;
-  categoryId: string;
-  isAvailable: boolean;
-  slug?: string;
-  images: ProductImage[];
-}
-
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -37,11 +22,9 @@ export async function PUT(
     const isAvailableStr = formData.get('isAvailable') as string;
     const isAvailable = isAvailableStr === 'true';
     const slugFromForm = formData.get('slug') as string;
-    const removeDefaultImage = formData.get('removeDefaultImage') === 'true';
-    const useDefaultImage = formData.get('useDefaultImage') === 'true';
     
-    // Получаем файлы изображений
-    const imageFiles = formData.getAll('images');
+    // Получаем URL изображений
+    const imageUrls = formData.getAll('imageUrls') as string[];
 
     // Проверяем обязательные поля
     if (!name || isNaN(price) || !categoryId) {
@@ -107,36 +90,26 @@ export async function PUT(
       }
     });
 
-    // Если загружены новые изображения
-    const validImageFiles = imageFiles.filter(file => 
-      file instanceof Blob && file.size > 0
-    );
-
-    if (validImageFiles.length > 0) {
+    // Обновляем изображения
+    if (imageUrls.length > 0) {
       // Удаляем все существующие изображения
       await prisma.image.deleteMany({
         where: { productId }
       });
 
-      // Загружаем новые изображения
-      const uploadPromises = validImageFiles.map(async (file) => {
-        try {
-          const imageUrl = await uploadImage(file as Blob, name);
-          return await prisma.image.create({
-            data: {
-              url: imageUrl,
-              productId
-            }
-          });
-        } catch (error) {
-          console.error('Error uploading file:', error);
-          return null;
-        }
-      });
+      // Создаем новые записи для изображений
+      const imagePromises = imageUrls.map(url =>
+        prisma.image.create({
+          data: {
+            url,
+            productId
+          }
+        })
+      );
 
-      await Promise.all(uploadPromises);
-    } else if (useDefaultImage) {
-      // Если нужно использовать изображение по умолчанию
+      await Promise.all(imagePromises);
+    } else {
+      // Если нет изображений, добавляем изображение по умолчанию
       await prisma.image.deleteMany({
         where: { productId }
       });

@@ -105,10 +105,9 @@ export async function POST(request: NextRequest) {
     const price = parseFloat(formData.get('price') as string);
     const categoryId = formData.get('categoryId') as string;
     const isAvailable = formData.get('isAvailable') === 'true';
-    const removeDefaultImage = formData.get('removeDefaultImage') === 'true';
     
-    // Получаем файлы изображений
-    const imageFiles = formData.getAll('images');
+    // Получаем URL изображений
+    const imageUrls = formData.getAll('imageUrls') as string[];
     
     // Создаем товар
     const product = await prisma.product.create({
@@ -122,35 +121,20 @@ export async function POST(request: NextRequest) {
       },
     });
     
-    // Загружаем изображения, если они есть
-    const validImageFiles = imageFiles.filter(file => 
-      file instanceof Blob && file.size > 0
-    );
-
-    if (validImageFiles.length > 0) {
-      // Загружаем изображения последовательно
-      const uploadPromises = validImageFiles.map(async (file) => {
-        try {
-          // Загружаем файл в Cloudinary и получаем URL
-          const imageUrl = await uploadImage(file as Blob, name);
-          
-          // Создаем запись об изображении в базе данных
-          return await prisma.image.create({
-            data: {
-              url: imageUrl,
-              productId: product.id,
-            },
-          });
-        } catch (error) {
-          console.error('Error uploading file:', error);
-          return null;
-        }
-      });
-
-      // Ждем завершения всех загрузок
-      await Promise.all(uploadPromises);
-    } else if (!removeDefaultImage) {
-      // Если изображения не были загружены и не указано удалить дефолтное изображение
+    // Создаем записи для изображений
+    if (imageUrls.length > 0) {
+      const imagePromises = imageUrls.map(url =>
+        prisma.image.create({
+          data: {
+            url,
+            productId: product.id,
+          },
+        })
+      );
+      
+      await Promise.all(imagePromises);
+    } else {
+      // Если нет изображений, добавляем изображение по умолчанию
       await prisma.image.create({
         data: {
           url: DEFAULT_PRODUCT_IMAGE,

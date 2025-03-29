@@ -262,48 +262,51 @@ export default function ProductsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
     try {
-      const formData = new FormData();
-      formData.append('name', newProduct.name);
-      formData.append('slug', newProduct.slug || generateSlug(newProduct.name));
-      formData.append('description', newProduct.description || '');
-      formData.append('price', newProduct.price.toString());
-      formData.append('categoryId', newProduct.categoryId || '');
-      formData.append('isAvailable', newProduct.isAvailable.toString());
+      // Сначала загружаем изображения
+      const uploadedImageUrls = [];
       
-      // Добавляем выбранные файлы
-      selectedFiles.forEach(file => {
-        formData.append('images', file);
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('name', newProduct.name);
+        
+        const response = await fetch('/api/admin/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!response.ok) {
+          throw new Error('Ошибка при загрузке изображения');
+        }
+        
+        const data = await response.json();
+        uploadedImageUrls.push(data.imageUrl);
+      }
+      
+      // Затем создаем или обновляем продукт
+      const productFormData = new FormData();
+      productFormData.append('name', newProduct.name);
+      productFormData.append('slug', newProduct.slug || generateSlug(newProduct.name));
+      productFormData.append('description', newProduct.description || '');
+      productFormData.append('price', newProduct.price.toString());
+      productFormData.append('categoryId', newProduct.categoryId);
+      productFormData.append('isAvailable', newProduct.isAvailable.toString());
+      
+      // Добавляем URL загруженных изображений
+      uploadedImageUrls.forEach(url => {
+        productFormData.append('imageUrls', url);
       });
-      
-      // Если добавляются новые изображения, указываем флаг для удаления изображения по умолчанию
-      if (selectedFiles.length > 0) {
-        formData.append('removeDefaultImage', 'true');
-      }
-      
-      // Если редактируем существующий продукт и у него нет изображений, и не выбраны новые,
-      // добавляем флаг для использования изображения по умолчанию
-      if (editingProduct && 
-          (editingProduct.images || editingProduct.productImages || []).length === 0 && 
-          selectedFiles.length === 0) {
-        formData.append('useDefaultImage', 'true');
-      }
       
       const url = editingProduct
         ? `/api/admin/products/${editingProduct.id}`
         : '/api/admin/products';
       
-      const method = editingProduct ? 'PUT' : 'POST';
-      
       const response = await fetch(url, {
-        method,
-        body: formData,
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
+        method: editingProduct ? 'PUT' : 'POST',
+        body: productFormData
       });
 
       if (!response.ok) {
@@ -316,12 +319,10 @@ export default function ProductsPage() {
       // Обновляем список продуктов
       setProducts(prevProducts => {
         if (editingProduct) {
-          // Обновляем существующий продукт
           return prevProducts.map(p => 
             p.id === savedProduct.id ? savedProduct : p
           );
         } else {
-          // Добавляем новый продукт в начало списка
           return [savedProduct, ...prevProducts];
         }
       });
@@ -338,11 +339,11 @@ export default function ProductsPage() {
       setSelectedFiles([]);
       setIsModalOpen(false);
       
-      // Принудительно обновляем список продуктов с сервера
+      // Обновляем список продуктов
       await fetchProducts();
     } catch (error) {
       console.error('Error saving product:', error);
-      alert(error instanceof Error ? error.message : 'Ошибка при сохранении товара');
+      setError(error instanceof Error ? error.message : 'Ошибка при сохранении товара');
     } finally {
       setIsLoading(false);
     }
