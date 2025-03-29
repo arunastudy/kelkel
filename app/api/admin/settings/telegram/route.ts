@@ -22,13 +22,36 @@ export async function GET() {
 
 // PUT /api/admin/settings/telegram
 export async function PUT(request: NextRequest) {
+  if (request.method !== 'PUT') {
+    return NextResponse.json(
+      { error: 'Метод не поддерживается' },
+      { status: 405 }
+    );
+  }
+
   try {
+    const contentType = request.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return NextResponse.json(
+        { error: 'Неверный формат данных' },
+        { status: 400 }
+      );
+    }
+
     const data = await request.json();
+    
+    if (!data || typeof data !== 'object') {
+      return NextResponse.json(
+        { error: 'Неверный формат данных' },
+        { status: 400 }
+      );
+    }
+
     const { telegramId } = data;
 
-    if (!telegramId) {
+    if (!telegramId || typeof telegramId !== 'string') {
       return NextResponse.json(
-        { error: 'ID Telegram не указан' },
+        { error: 'ID Telegram не указан или имеет неверный формат' },
         { status: 400 }
       );
     }
@@ -42,7 +65,10 @@ export async function PUT(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ telegramId: setting.value });
+    return NextResponse.json({ 
+      success: true,
+      telegramId: setting.value 
+    });
   } catch (error) {
     console.error('Error updating telegram settings:', error);
     return NextResponse.json(
