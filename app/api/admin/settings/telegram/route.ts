@@ -10,58 +10,46 @@ export async function GET() {
       where: { key: 'telegram_id' }
     });
 
-    return new Response(
-      JSON.stringify({ telegramId: setting?.value || '' }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return new Response(setting?.value || '', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
   } catch (error) {
     console.error('Error getting telegram settings:', error);
-    return new Response(
-      JSON.stringify({ error: 'Ошибка при получении настроек Telegram' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return new Response('Ошибка при получении настроек Telegram', {
+      status: 500,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
   }
 }
 
 // PUT /api/admin/settings/telegram
 export async function PUT(request: NextRequest) {
   try {
-    const data = await request.json();
-    const { telegramId } = data;
+    const formData = await request.formData();
+    const telegramId = formData.get('telegramId');
 
     if (!telegramId) {
-      return new Response(
-        JSON.stringify({ error: 'ID Telegram не указан' }),
-        {
-          status: 400,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return new Response('ID Telegram не указан', {
+        status: 400,
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      });
     }
 
     const cleanTelegramId = telegramId.toString().trim();
     if (!/^\d+$/.test(cleanTelegramId)) {
-      return new Response(
-        JSON.stringify({ error: 'ID Telegram должен содержать только цифры' }),
-        {
-          status: 400,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return new Response('ID Telegram должен содержать только цифры', {
+        status: 400,
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      });
     }
 
     await prisma.settings.upsert({
@@ -73,25 +61,19 @@ export async function PUT(request: NextRequest) {
       }
     });
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return new Response('ok', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
   } catch (error) {
     console.error('Error updating telegram settings:', error);
-    return new Response(
-      JSON.stringify({ error: 'Ошибка при обновлении настроек Telegram' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return new Response('Ошибка при обновлении настроек Telegram', {
+      status: 500,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
   }
 } 

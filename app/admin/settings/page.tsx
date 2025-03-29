@@ -28,12 +28,12 @@ export default function SettingsPage() {
         throw new Error('Ошибка при загрузке настроек');
       }
 
-      const [telegramData, loginData] = await Promise.all([
-        telegramResponse.json(),
+      const [telegramId, loginData] = await Promise.all([
+        telegramResponse.text(),
         loginResponse.json()
       ]);
 
-      setTelegramId(telegramData.telegramId || '');
+      setTelegramId(telegramId || '');
       setLogin(loginData.login || '');
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -53,17 +53,17 @@ export default function SettingsPage() {
     setSuccess('');
 
     try {
+      const formData = new FormData();
+      formData.append('telegramId', telegramId);
+
       const response = await fetch('/api/admin/settings/telegram', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ telegramId })
+        body: formData
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Ошибка при обновлении Telegram ID');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Ошибка при обновлении Telegram ID');
       }
 
       setSuccess('Telegram ID успешно обновлен');
