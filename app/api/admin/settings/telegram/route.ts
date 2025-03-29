@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -6,55 +6,51 @@ const prisma = new PrismaClient();
 // GET /api/admin/settings/telegram
 export async function GET() {
   try {
-    const setting = await prisma.settings.findUnique({
-      where: { key: 'telegram_id' }
-    });
-
-    return NextResponse.json(setting || { value: '' });
+    const settings = await prisma.settings.findFirst();
+    return NextResponse.json(settings || { telegramId: '' });
   } catch (error) {
-    console.error('Error fetching telegram setting:', error);
+    console.error('Error getting telegram settings:', error);
     return NextResponse.json(
-      { error: 'Ошибка при получении настроек' },
+      { error: 'Ошибка при получении настроек Telegram' },
       { status: 500 }
     );
   }
 }
 
 // PUT /api/admin/settings/telegram
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
   try {
-    const { value } = await request.json();
+    const data = await request.json();
+    const { telegramId } = data;
 
-    if (!value) {
+    if (!telegramId) {
       return NextResponse.json(
-        { error: 'ID Telegram обязателен' },
+        { error: 'ID Telegram не указан' },
         { status: 400 }
       );
     }
 
-    // Валидация формата ID Telegram (только цифры и буквы)
-    const telegramIdRegex = /^[a-zA-Z0-9_]{5,32}$/;
-    if (!telegramIdRegex.test(value)) {
-      return NextResponse.json(
-        { error: 'Неверный формат ID Telegram. Используйте только буквы, цифры и знак подчеркивания (5-32 символа)' },
-        { status: 400 }
-      );
+    // Получаем текущие настройки
+    let settings = await prisma.settings.findFirst();
+
+    if (settings) {
+      // Обновляем существующие настройки
+      settings = await prisma.settings.update({
+        where: { id: settings.id },
+        data: { telegramId }
+      });
+    } else {
+      // Создаем новые настройки, если они не существуют
+      settings = await prisma.settings.create({
+        data: { telegramId }
+      });
     }
 
-    const setting = await prisma.settings.upsert({
-      where: { key: 'telegram_id' },
-      update: { value },
-      create: {
-        key: 'telegram_id',
-        value
-      }
-    });
-
-    return NextResponse.json(setting);
+    return NextResponse.json(settings);
   } catch (error) {
-    console.error('Error updating telegram setting:', error);
+    console.error('Error updating telegram settings:', error);
     return NextResponse.json(
-      { error: 'Ошибка при обновлении настроек' },
+      { error: 'Ошибка при обновлении настроек Telegram' },
       { status: 500 }
     );
   }
