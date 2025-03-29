@@ -27,7 +27,7 @@ export default function SettingsPage() {
       ]);
 
       if (telegramResponse.ok) {
-        setTelegramId(telegramData.value || '');
+        setTelegramId(telegramData.telegramId || '');
       }
       if (loginResponse.ok) {
         setLogin(loginData.login || '');
@@ -48,7 +48,7 @@ export default function SettingsPage() {
         fetch('/api/admin/settings/telegram', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ value: telegramId }),
+          body: JSON.stringify({ telegramId }),
         }),
         password ? fetch('/api/admin/settings/credentials', {
           method: 'PUT',
