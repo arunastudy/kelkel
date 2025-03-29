@@ -21,17 +21,17 @@ export default function SettingsPage() {
         fetch('/api/admin/settings/credentials')
       ]);
 
+      if (!telegramResponse.ok || !loginResponse.ok) {
+        throw new Error('Ошибка при загрузке настроек');
+      }
+
       const [telegramData, loginData] = await Promise.all([
         telegramResponse.json(),
         loginResponse.json()
       ]);
 
-      if (telegramResponse.ok) {
-        setTelegramId(telegramData.telegramId || '');
-      }
-      if (loginResponse.ok) {
-        setLogin(loginData.login || '');
-      }
+      setTelegramId(telegramData.telegramId || '');
+      setLogin(loginData.login || '');
     } catch (error) {
       console.error('Error fetching settings:', error);
       setError('Ошибка при загрузке настроек');
