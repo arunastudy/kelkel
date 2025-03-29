@@ -13,56 +13,23 @@ export async function GET() {
     return NextResponse.json({ telegramId: setting?.value || '' });
   } catch (error) {
     console.error('Error getting telegram settings:', error);
-    return NextResponse.json(
-      { error: 'Ошибка при получении настроек Telegram' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Ошибка при получении настроек Telegram' }, { status: 500 });
   }
 }
 
 // PUT /api/admin/settings/telegram
 export async function PUT(request: NextRequest) {
-  if (request.method !== 'PUT') {
-    return NextResponse.json(
-      { error: 'Метод не поддерживается' },
-      { status: 405 }
-    );
-  }
-
   try {
-    const contentType = request.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      return NextResponse.json(
-        { error: 'Неверный формат данных' },
-        { status: 400 }
-      );
-    }
-
     const data = await request.json();
-    
-    if (!data || typeof data !== 'object') {
-      return NextResponse.json(
-        { error: 'Неверный формат данных' },
-        { status: 400 }
-      );
-    }
-
     const { telegramId } = data;
 
     if (!telegramId) {
-      return NextResponse.json(
-        { error: 'ID Telegram не указан' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID Telegram не указан' }, { status: 400 });
     }
 
-    // Очищаем ID от пробелов и проверяем формат
     const cleanTelegramId = telegramId.toString().trim();
     if (!/^\d+$/.test(cleanTelegramId)) {
-      return NextResponse.json(
-        { error: 'ID Telegram должен содержать только цифры' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID Telegram должен содержать только цифры' }, { status: 400 });
     }
 
     const setting = await prisma.settings.upsert({
@@ -74,15 +41,25 @@ export async function PUT(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({
-      success: true,
-      telegramId: setting.value
-    });
+    return new NextResponse(
+      JSON.stringify({ telegramId: setting.value }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error updating telegram settings:', error);
-    return NextResponse.json(
-      { error: 'Ошибка при обновлении настроек Telegram' },
-      { status: 500 }
+    return new NextResponse(
+      JSON.stringify({ error: 'Ошибка при обновлении настроек Telegram' }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
     );
   }
 } 

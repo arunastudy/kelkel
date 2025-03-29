@@ -16,37 +16,22 @@ export default function SettingsPage() {
 
   const fetchSettings = async () => {
     try {
-      const [telegramResponse, loginResponse] = await Promise.all([
-        fetch('/api/admin/settings/telegram'),
-        fetch('/api/admin/settings/credentials')
-      ]);
+      const telegramResponse = await fetch('/api/admin/settings/telegram');
+      const loginResponse = await fetch('/api/admin/settings/credentials');
 
-      if (!telegramResponse.ok || !loginResponse.ok) {
-        throw new Error('Ошибка при загрузке настроек');
+      const telegramData = await telegramResponse.json();
+      const loginData = await loginResponse.json();
+
+      if (telegramResponse.ok) {
+        setTelegramId(telegramData.telegramId || '');
       }
-
-      const [telegramData, loginData] = await Promise.all([
-        telegramResponse.json(),
-        loginResponse.json()
-      ]);
-
-      setTelegramId(telegramData.telegramId || '');
-      setLogin(loginData.login || '');
+      if (loginResponse.ok) {
+        setLogin(loginData.login || '');
+      }
     } catch (error) {
       console.error('Error fetching settings:', error);
       setError('Ошибка при загрузке настроек');
     }
-  };
-
-  const validateTelegramId = (id: string) => {
-    const cleanId = id.trim();
-    if (!cleanId) {
-      throw new Error('ID Telegram не может быть пустым');
-    }
-    if (!/^\d+$/.test(cleanId)) {
-      throw new Error('ID Telegram должен содержать только цифры');
-    }
-    return cleanId;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,40 +41,34 @@ export default function SettingsPage() {
     setSuccess('');
 
     try {
-      // Валидация Telegram ID
-      const cleanTelegramId = validateTelegramId(telegramId);
-
       // Сохраняем Telegram ID
-      const telegramResponse = await fetch('/api/admin/settings/telegram', {
+      const response = await fetch('/api/admin/settings/telegram', {
         method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+        headers: {
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ telegramId: cleanTelegramId })
+        body: JSON.stringify({ telegramId: telegramId.trim() })
       });
 
-      const telegramData = await telegramResponse.json();
+      const data = await response.json();
 
-      if (!telegramResponse.ok) {
-        throw new Error(telegramData.error || 'Ошибка при обновлении настроек Telegram');
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка при обновлении настроек');
       }
 
-      // Если указан новый пароль, обновляем учетные данные
+      // Если есть пароль, обновляем учетные данные
       if (password) {
         const credentialsResponse = await fetch('/api/admin/settings/credentials', {
           method: 'PUT',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+          headers: {
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({ login, password })
         });
 
-        const credentialsData = await credentialsResponse.json();
-
         if (!credentialsResponse.ok) {
-          throw new Error(credentialsData.error || 'Ошибка при обновлении учетных данных');
+          const credData = await credentialsResponse.json();
+          throw new Error(credData.error || 'Ошибка при обновлении учетных данных');
         }
       }
 
@@ -102,14 +81,6 @@ export default function SettingsPage() {
       setError(error instanceof Error ? error.message : 'Ошибка при обновлении настроек');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleTelegramIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Разрешаем только цифры и пробелы при вводе
-    if (/^[\d\s]*$/.test(value)) {
-      setTelegramId(value);
     }
   };
 
@@ -140,7 +111,7 @@ export default function SettingsPage() {
               <input
                 type="text"
                 value={telegramId}
-                onChange={handleTelegramIdChange}
+                onChange={(e) => setTelegramId(e.target.value.replace(/[^\d]/g, ''))}
                 placeholder="123456789"
                 className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
               />
