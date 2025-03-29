@@ -33,6 +33,7 @@ export default function SettingsPage() {
         setLogin(loginData.login || '');
       }
     } catch (error) {
+      console.error('Error fetching settings:', error);
       setError('Ошибка при загрузке настроек');
     }
   };
@@ -44,31 +45,39 @@ export default function SettingsPage() {
     setSuccess('');
 
     try {
-      const [telegramResponse, credentialsResponse] = await Promise.all([
-        fetch('/api/admin/settings/telegram', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ telegramId }),
-        }),
-        password ? fetch('/api/admin/settings/credentials', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ login, password }),
-        }) : Promise.resolve(null)
-      ]);
+      // Сохраняем Telegram ID
+      const telegramResponse = await fetch('/api/admin/settings/telegram', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramId })
+      });
 
-      if (!telegramResponse.ok || (credentialsResponse && !credentialsResponse.ok)) {
+      if (!telegramResponse.ok) {
         const data = await telegramResponse.json();
-        setError(data.error || 'Ошибка при обновлении настроек');
-        return;
+        throw new Error(data.error || 'Ошибка при обновлении настроек Telegram');
+      }
+
+      // Если указан новый пароль, обновляем учетные данные
+      if (password) {
+        const credentialsResponse = await fetch('/api/admin/settings/credentials', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ login, password })
+        });
+
+        if (!credentialsResponse.ok) {
+          const data = await credentialsResponse.json();
+          throw new Error(data.error || 'Ошибка при обновлении учетных данных');
+        }
       }
 
       setSuccess('Настройки успешно обновлены');
       if (password) {
-        setPassword(''); // Очищаем поле пароля после успешного обновления
+        setPassword('');
       }
     } catch (error) {
-      setError('Ошибка при обновлении настроек');
+      console.error('Error updating settings:', error);
+      setError(error instanceof Error ? error.message : 'Ошибка при обновлении настроек');
     } finally {
       setIsLoading(false);
     }
