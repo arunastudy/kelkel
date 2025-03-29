@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon, MagnifyingGlassIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { generateSlug } from '@/app/utils/helpers';
-import { deleteImage } from '@/app/utils/images';
+import { v2 as cloudinary } from 'cloudinary';
 import ImportExportModal from '@/app/components/ImportExportModal';
 
 interface Category {
@@ -53,6 +53,24 @@ interface FilterParams {
   sortOrder: 'asc' | 'desc';
   page: number;
   perPage: number;
+}
+
+// Конфигурация Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Функция для удаления изображения из Cloudinary
+async function deleteImage(url: string) {
+  try {
+    // Извлекаем public_id из URL
+    const publicId = url.split('/').slice(-2).join('/').split('.')[0];
+    await cloudinary.uploader.destroy(publicId);
+  } catch (error) {
+    console.error('Error deleting image from Cloudinary:', error);
+  }
 }
 
 export default function ProductsPage() {
