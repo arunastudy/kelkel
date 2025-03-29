@@ -10,6 +10,30 @@ interface CategoryData {
   slug?: string;
 }
 
+interface CategoryWithCount {
+  id: string;
+  name: string;
+  description: string | null;
+  slug: string;
+  createdAt: Date;
+  updatedAt: Date;
+  products: any[];
+  _count: {
+    products: number;
+  };
+}
+
+interface FormattedCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  slug: string;
+  createdAt: Date;
+  updatedAt: Date;
+  products: any[];
+  productsCount: number;
+}
+
 // GET /api/admin/categories
 export async function GET(request: NextRequest) {
   try {
@@ -22,14 +46,16 @@ export async function GET(request: NextRequest) {
     const perPage = all ? 0 : parseInt(searchParams.get('perPage') || '10');
 
     // Создаем условия для фильтрации
-    let where: any = {};
+    let where = {};
     
     // Поиск по названию или описанию
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
-      ];
+      where = {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } }
+        ]
+      };
     }
 
     // Получаем общее количество категорий
@@ -51,27 +77,29 @@ export async function GET(request: NextRequest) {
     });
 
     // Форматируем ответ и сортируем
-    let formattedCategories = categories.map(category => ({
-      ...category,
-      productsCount: category._count.products,
-      _count: undefined
-    }));
+    let formattedCategories = categories.map((category: CategoryWithCount): FormattedCategory => {
+      const { _count, ...rest } = category;
+      return {
+        ...rest,
+        productsCount: _count.products
+      };
+    });
 
     // Сортируем результаты
     if (sortBy === 'productsCount') {
-      formattedCategories.sort((a, b) => {
+      formattedCategories.sort((a: FormattedCategory, b: FormattedCategory) => {
         return sortOrder === 'asc' 
           ? a.productsCount - b.productsCount
           : b.productsCount - a.productsCount;
       });
     } else if (sortBy === 'name' || sortBy === 'createdAt') {
-      formattedCategories.sort((a, b) => {
-        const aValue = a[sortBy];
-        const bValue = b[sortBy];
+      formattedCategories.sort((a: FormattedCategory, b: FormattedCategory) => {
+        const aValue = String(a[sortBy as keyof FormattedCategory]);
+        const bValue = String(b[sortBy as keyof FormattedCategory]);
         if (sortOrder === 'asc') {
-          return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+          return aValue.localeCompare(bValue);
         } else {
-          return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+          return bValue.localeCompare(aValue);
         }
       });
     }

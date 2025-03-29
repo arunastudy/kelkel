@@ -7,10 +7,10 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:12345@db:5432/postgres?schema=public
-      - JWT_SECRET=ApakaiStore16032025
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres?schema=public
+      - JWT_SECRET=your-secret-key
       - NEXTAUTH_URL=http://62.113.41.23
-      - NEXTAUTH_SECRET=ApakaiStore16032025
+      - NEXTAUTH_SECRET=your-nextauth-secret
     depends_on:
       - db
     networks:
@@ -35,10 +35,8 @@ services:
     restart: always
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
     ports:
       - "80:80"
-      - "443:443"
     depends_on:
       - web
     networks:
