@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && prisma migrate deploy && prisma db push && next build",
     "start": "next start",
     "seed": "ts-node prisma/seed.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "setup-db": "ts-node scripts/seed-db.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
