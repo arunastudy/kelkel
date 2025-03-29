@@ -6,9 +6,9 @@
     "dev": "next dev",
     "build": "prisma generate && prisma migrate deploy && prisma db seed && next build",
     "start": "next start",
-    "seed": "ts-node prisma/seed.ts",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && prisma db seed && next build"
+    "vercel-build": "prisma generate && prisma migrate deploy && prisma db seed && next build",
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",

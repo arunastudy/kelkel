@@ -6,12 +6,17 @@ const prisma = new PrismaClient();
 
 async function main() {
   try {
-    // Создаем админа если его нет
+    // Удаляем старые учетные данные админа если они есть
+    await prisma.settings.deleteMany({
+      where: {
+        key: 'admin_credentials'
+      }
+    });
+
+    // Создаем новые учетные данные админа
     const adminPassword = await bcrypt.hash('admin123', 10);
-    await prisma.settings.upsert({
-      where: { key: 'admin_credentials' },
-      update: {},
-      create: {
+    const adminSettings = await prisma.settings.create({
+      data: {
         key: 'admin_credentials',
         value: JSON.stringify({
           login: 'admin',
@@ -20,7 +25,7 @@ async function main() {
       }
     });
 
-    console.log('Admin credentials created/updated');
+    console.log('Admin credentials created:', { login: 'admin', password: 'admin123' });
 
     // Создаем тестовую категорию если нет категорий
     const categoriesCount = await prisma.category.count();
