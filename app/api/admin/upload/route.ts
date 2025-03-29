@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { saveImage } from '@/app/server/files';
+import { saveImage } from '@/app/utils/images';
 import { generateSlug } from '@/app/utils/helpers';
 
 export async function POST(request: Request) {

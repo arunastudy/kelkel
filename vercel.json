@@ -13,5 +13,15 @@
   ],
   "env": {
     "PRISMA_GENERATE_DATAPROXY": "true"
+  },
+  "functions": {
+    "app/api/admin/upload/route.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "app/api/upload/route.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
   }
 } 
