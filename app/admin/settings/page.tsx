@@ -6,7 +6,10 @@ export default function SettingsPage() {
   const [telegramId, setTelegramId] = useState('');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState({
+    telegram: false,
+    credentials: false
+  });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -36,7 +39,12 @@ export default function SettingsPage() {
     }
   };
 
-  const saveTelegramId = async () => {
+  const handleTelegramSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(prev => ({ ...prev, telegram: true }));
+    setError('');
+    setSuccess('');
+
     try {
       const response = await fetch('/api/admin/settings/telegram', {
         method: 'PUT',
@@ -47,23 +55,27 @@ export default function SettingsPage() {
       });
 
       const data = await response.json();
+
       if (!response.ok) {
         throw new Error(data.error || 'Ошибка при обновлении Telegram ID');
       }
 
-      return true;
+      setSuccess('Telegram ID успешно обновлен');
     } catch (error) {
-      throw error;
+      console.error('Error updating telegram ID:', error);
+      setError(error instanceof Error ? error.message : 'Ошибка при обновлении Telegram ID');
+    } finally {
+      setIsLoading(prev => ({ ...prev, telegram: false }));
     }
   };
 
-  const saveCredentials = async () => {
-    try {
-      // Сохраняем учетные данные только если есть логин
-      if (!login) {
-        throw new Error('Логин обязателен');
-      }
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(prev => ({ ...prev, credentials: true }));
+    setError('');
+    setSuccess('');
 
+    try {
       const response = await fetch('/api/admin/settings/credentials', {
         method: 'PUT',
         headers: {
@@ -73,51 +85,18 @@ export default function SettingsPage() {
       });
 
       const data = await response.json();
+
       if (!response.ok) {
         throw new Error(data.error || 'Ошибка при обновлении учетных данных');
       }
 
-      return true;
+      setSuccess('Учетные данные успешно обновлены');
+      setPassword('');
     } catch (error) {
-      throw error;
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      const updates = [];
-
-      // Сохраняем Telegram ID если он указан
-      if (telegramId) {
-        updates.push(saveTelegramId());
-      }
-
-      // Сохраняем учетные данные если изменился логин или указан новый пароль
-      if (login) {
-        updates.push(saveCredentials());
-      }
-
-      if (updates.length === 0) {
-        setError('Нет данных для сохранения');
-        return;
-      }
-
-      await Promise.all(updates);
-      setSuccess('Настройки успешно обновлены');
-      
-      if (password) {
-        setPassword('');
-      }
-    } catch (error) {
-      console.error('Error updating settings:', error);
-      setError(error instanceof Error ? error.message : 'Ошибка при обновлении настроек');
+      console.error('Error updating credentials:', error);
+      setError(error instanceof Error ? error.message : 'Ошибка при обновлении учетных данных');
     } finally {
-      setIsLoading(false);
+      setIsLoading(prev => ({ ...prev, credentials: false }));
     }
   };
 
@@ -137,60 +116,66 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="bg-gray-900 rounded-xl p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-white">Telegram</h2>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                ID Telegram
-              </label>
-              <input
-                type="text"
-                value={telegramId}
-                onChange={(e) => setTelegramId(e.target.value.replace(/[^\d]/g, ''))}
-                placeholder="123456789"
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              />
-              <p className="mt-1 text-sm text-gray-400">
-                Введите ваш ID Telegram (только цифры), например: 123456789
-              </p>
-            </div>
+      <div className="bg-gray-900 rounded-xl p-6 space-y-8">
+        <form onSubmit={handleTelegramSubmit} className="space-y-4">
+          <h2 className="text-xl font-semibold text-white">Telegram</h2>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              ID Telegram
+            </label>
+            <input
+              type="text"
+              value={telegramId}
+              onChange={(e) => setTelegramId(e.target.value.replace(/[^\d]/g, ''))}
+              placeholder="123456789"
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            />
+            <p className="mt-1 text-sm text-gray-400">
+              Введите ваш ID Telegram (только цифры), например: 123456789
+            </p>
           </div>
-
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-white">Учетные данные</h2>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Логин
-              </label>
-              <input
-                type="text"
-                value={login}
-                onChange={(e) => setLogin(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Новый пароль
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Оставьте пустым, чтобы не менять"
-                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
-          </div>
-
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading.telegram}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
-            {isLoading ? 'Сохранение...' : 'Сохранить'}
+            {isLoading.telegram ? 'Сохранение...' : 'Сохранить Telegram ID'}
+          </button>
+        </form>
+
+        <div className="border-t border-gray-800 my-6"></div>
+
+        <form onSubmit={handleCredentialsSubmit} className="space-y-4">
+          <h2 className="text-xl font-semibold text-white">Учетные данные</h2>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Логин
+            </label>
+            <input
+              type="text"
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Новый пароль
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Оставьте пустым, чтобы не менять"
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading.credentials}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          >
+            {isLoading.credentials ? 'Сохранение...' : 'Сохранить учетные данные'}
           </button>
         </form>
       </div>
