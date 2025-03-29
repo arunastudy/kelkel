@@ -24,8 +24,11 @@ export default function LogoutButton() {
       });
 
       if (response.ok) {
-        // Перезагружаем страницу для применения изменений в куки
-        router.refresh();
+        // Удаляем auth_token куки на клиенте
+        Cookies.remove('auth_token', { path: '/' });
+        
+        // Перенаправляем на главную страницу
+        window.location.href = '/';
       }
     } catch (error) {
       console.error('Error during logout:', error);
