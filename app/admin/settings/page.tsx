@@ -52,8 +52,9 @@ export default function SettingsPage() {
         body: JSON.stringify({ telegramId })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || 'Ошибка при обновлении Telegram ID');
       }
 
@@ -67,8 +68,9 @@ export default function SettingsPage() {
           body: JSON.stringify({ login, password })
         });
 
+        const credData = await credentialsResponse.json();
+
         if (!credentialsResponse.ok) {
-          const credData = await credentialsResponse.json();
           throw new Error(credData.error || 'Ошибка при обновлении учетных данных');
         }
       }
