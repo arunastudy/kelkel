@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
-import { saveImage } from '@/app/server/files';
+import { saveImage, DEFAULT_PRODUCT_IMAGE } from '@/app/utils/images';
 
 const prisma = new PrismaClient();
 
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
       // Если изображения не были загружены и не указано удалить дефолтное изображение
       await prisma.image.create({
         data: {
-          url: '/images/product-default.png',
+          url: DEFAULT_PRODUCT_IMAGE,
           productId: product.id,
         },
       });

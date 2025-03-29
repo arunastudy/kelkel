@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
-import { saveImage } from '@/app/server/files';
+import { saveImage, DEFAULT_PRODUCT_IMAGE } from '@/app/utils/images';
 
 const prisma = new PrismaClient();
 
@@ -143,7 +143,7 @@ export async function PUT(
       await prisma.image.deleteMany({
         where: { 
           productId,
-          url: '/images/product-default.png'
+          url: DEFAULT_PRODUCT_IMAGE
         }
       });
       
@@ -172,7 +172,7 @@ export async function PUT(
     if (shouldAddDefaultImage) {
       await prisma.image.create({
         data: {
-          url: '/images/product-default.png',
+          url: DEFAULT_PRODUCT_IMAGE,
           productId
         }
       });

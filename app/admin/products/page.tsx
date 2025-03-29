@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon, MagnifyingGlassIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { generateSlug } from '@/app/utils/helpers';
-import { deleteImage } from '@/app/server/files';
+import { deleteImage } from '@/app/utils/images';
 import ImportExportModal from '@/app/components/ImportExportModal';
 
 interface Category {

@@ -11,6 +11,7 @@ import { useProducts } from '@/app/hooks/useProducts';
 import { useLanguageContext } from '@/app/contexts/LanguageContext';
 import Cookies from 'js-cookie';
 import { TranslationKey } from '@/app/i18n/types';
+import { DEFAULT_PRODUCT_IMAGE } from '@/app/utils/images';
 
 // Компонент для просмотра галереи изображений товара
 function ProductGallery({ images, name, price, t }: { images: any[], name: string, price: number, t: (key: TranslationKey) => string }) {
@@ -33,7 +34,7 @@ function ProductGallery({ images, name, price, t }: { images: any[], name: strin
   return (
     <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
       <Image
-        src={images[currentIndex]?.url || '/images/product-default.png'}
+        src={images[currentIndex]?.url || DEFAULT_PRODUCT_IMAGE}
         alt={name}
         fill
         className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
