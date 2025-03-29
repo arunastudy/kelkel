@@ -1,44 +1,68 @@
-import { promises as fs } from 'fs';
+import fs from 'fs';
 import path from 'path';
+import slugify from 'slugify';
 
 export const IMAGES_DIR = path.join(process.cwd(), 'public', 'images');
 export const DEFAULT_PRODUCT_IMAGE = '/images/product-default.jpg';
 export const DEFAULT_REVIEW_IMAGE = '/images/review-default.jpg';
 
-export async function ensureImageDirectory() {
-  try {
-    await fs.access(IMAGES_DIR);
-  } catch {
-    await fs.mkdir(IMAGES_DIR, { recursive: true });
+export const ensureImageDirectory = () => {
+  const imagesDir = path.join(process.cwd(), 'public/images');
+  if (!fs.existsSync(imagesDir)) {
+    fs.mkdirSync(imagesDir, { recursive: true });
   }
-}
+  return imagesDir;
+};
 
-export async function saveImage(file: Blob, prefix: string): Promise<string> {
-  await ensureImageDirectory();
+const generateUniqueFileName = (originalName: string, index: number = 0): string => {
+  const ext = path.extname(originalName);
+  const nameWithoutExt = path.basename(originalName, ext);
+  
+  const slugifiedName = slugify(nameWithoutExt, { lower: true, strict: true });
+  
+  const finalName = index === 0 ? slugifiedName : `${slugifiedName}-${index}`;
+  return `${finalName}${ext}`;
+};
 
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
-  // Генерируем уникальное имя файла с временной меткой
-  const timestamp = Date.now();
-  const fileName = `${prefix}-${timestamp}.jpg`;
-  const filePath = path.join(IMAGES_DIR, fileName);
-
-  await fs.writeFile(filePath, buffer);
-  return `/images/${fileName}`;
-}
-
-export async function deleteImage(imageUrl: string): Promise<void> {
-  if (!imageUrl || imageUrl === DEFAULT_PRODUCT_IMAGE || imageUrl === DEFAULT_REVIEW_IMAGE) {
-    return;
-  }
-
-  const fileName = path.basename(imageUrl);
-  const filePath = path.join(IMAGES_DIR, fileName);
-
+export const saveImage = async (file: Blob, productName: string): Promise<string> => {
   try {
-    await fs.unlink(filePath);
+    const imagesDir = ensureImageDirectory();
+    
+    const originalName = (file as any).name || 'image.jpg';
+    
+    let fileName = generateUniqueFileName(originalName);
+    let fullPath = path.join(imagesDir, fileName);
+    let index = 1;
+    
+    while (fs.existsSync(fullPath)) {
+      fileName = generateUniqueFileName(originalName, index);
+      fullPath = path.join(imagesDir, fileName);
+      index++;
+    }
+    
+    const buffer = Buffer.from(await file.arrayBuffer());
+    
+    fs.writeFileSync(fullPath, buffer);
+    
+    return `/images/${fileName}`;
+  } catch (error) {
+    console.error('Error saving image:', error);
+    throw new Error('Failed to save image');
+  }
+};
+
+export const deleteImage = async (imageUrl: string) => {
+  try {
+    if (imageUrl === DEFAULT_PRODUCT_IMAGE) {
+      return;
+    }
+
+    const imagePath = path.join(process.cwd(), 'public', imageUrl);
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+    }
   } catch (error) {
     console.error('Error deleting image:', error);
+    throw new Error('Failed to delete image');
   }
-} 
+}; 

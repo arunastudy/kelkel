@@ -127,10 +127,10 @@ export async function POST(request: NextRequest) {
 
     if (validImageFiles.length > 0) {
       // Загружаем изображения последовательно
-      const uploadPromises = validImageFiles.map(async (file) => {
+      const uploadPromises = validImageFiles.map(async (file, index) => {
         try {
           // Сохраняем файл и получаем URL
-          const imageUrl = await saveImage(file as Blob, slug);
+          const imageUrl = await saveImage(file as Blob, name);
           
           // Создаем запись об изображении в базе данных
           return await prisma.image.create({

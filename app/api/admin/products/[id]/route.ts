@@ -121,9 +121,9 @@ export async function PUT(
       });
 
       // Загружаем новые изображения последовательно
-      const uploadPromises = validImageFiles.map(async (file) => {
+      const uploadPromises = validImageFiles.map(async (file, index) => {
         try {
-          const imageUrl = await saveImage(file as Blob, slug);
+          const imageUrl = await saveImage(file as Blob, name);
           return await prisma.image.create({
             data: {
               url: imageUrl,
