@@ -28,13 +28,13 @@ export default function SettingsPage() {
         throw new Error('Ошибка при загрузке настроек');
       }
 
-      const [telegramId, loginData] = await Promise.all([
+      const [telegramId, login] = await Promise.all([
         telegramResponse.text(),
-        loginResponse.json()
+        loginResponse.text()
       ]);
 
       setTelegramId(telegramId || '');
-      setLogin(loginData.login || '');
+      setLogin(login || '');
     } catch (error) {
       console.error('Error fetching settings:', error);
       setError('Ошибка при загрузке настроек');
@@ -93,7 +93,7 @@ export default function SettingsPage() {
 
     try {
       const response = await fetch('/api/admin/settings/credentials', {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -101,12 +101,17 @@ export default function SettingsPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Ошибка при обновлении учетных данных');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Ошибка при обновлении учетных данных');
       }
 
-      setSuccess('Учетные данные успешно обновлены');
-      setPassword('');
+      const responseText = await response.text();
+      if (responseText === 'ok') {
+        setSuccess('Учетные данные успешно обновлены');
+        setPassword('');
+      } else {
+        throw new Error('Неожиданный ответ от сервера');
+      }
     } catch (error) {
       console.error('Error updating credentials:', error);
       setError(error instanceof Error ? error.message : 'Ошибка при обновлении учетных данных');

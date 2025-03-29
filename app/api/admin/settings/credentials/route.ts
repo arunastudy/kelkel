@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
@@ -12,25 +12,44 @@ export async function GET() {
     });
 
     if (!setting?.value) {
-      return NextResponse.json({ login: '' });
+      return new Response('', {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      });
     }
 
     const credentials = JSON.parse(setting.value);
-    return NextResponse.json({ login: credentials.login });
+    return new Response(credentials.login || '', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
   } catch (error) {
     console.error('Error getting credentials:', error);
-    return NextResponse.json({ error: 'Ошибка при получении учетных данных' }, { status: 500 });
+    return new Response('Ошибка при получении учетных данных', {
+      status: 500,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
   }
 }
 
-// PUT /api/admin/settings/credentials
-export async function PUT(request: NextRequest) {
+// POST /api/admin/settings/credentials
+export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
-    const { login, password } = data;
+    const { login, password } = await request.json();
 
     if (!login) {
-      return NextResponse.json({ error: 'Логин не указан' }, { status: 400 });
+      return new Response('Логин не указан', {
+        status: 400,
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      });
     }
 
     // Получаем текущие учетные данные
@@ -62,9 +81,19 @@ export async function PUT(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ success: true });
+    return new Response('ok', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
   } catch (error) {
     console.error('Error updating credentials:', error);
-    return NextResponse.json({ error: 'Ошибка при обновлении учетных данных' }, { status: 500 });
+    return new Response('Ошибка при обновлении учетных данных', {
+      status: 500,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
   }
 } 
