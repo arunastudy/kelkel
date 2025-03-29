@@ -1,22 +1,21 @@
 import { PrismaClient } from '@prisma/client';
-import slugify from 'slugify';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   try {
-    // Удаляем старые учетные данные админа если они есть
-    await prisma.settings.deleteMany({
-      where: {
-        key: 'admin_credentials'
-      }
-    });
-
-    // Создаем новые учетные данные админа
+    // Создаем учетные данные админа
     const adminPassword = await bcrypt.hash('admin123', 10);
-    const adminSettings = await prisma.settings.create({
-      data: {
+    await prisma.settings.upsert({
+      where: { key: 'admin_credentials' },
+      update: {
+        value: JSON.stringify({
+          login: 'admin',
+          password: adminPassword
+        })
+      },
+      create: {
         key: 'admin_credentials',
         value: JSON.stringify({
           login: 'admin',
