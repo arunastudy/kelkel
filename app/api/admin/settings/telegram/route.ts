@@ -32,7 +32,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'ID Telegram должен содержать только цифры' }, { status: 400 });
     }
 
-    const setting = await prisma.settings.upsert({
+    await prisma.settings.upsert({
       where: { key: 'telegram_id' },
       update: { value: cleanTelegramId },
       create: {
@@ -41,25 +41,9 @@ export async function PUT(request: NextRequest) {
       }
     });
 
-    return new NextResponse(
-      JSON.stringify({ telegramId: setting.value }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error updating telegram settings:', error);
-    return new NextResponse(
-      JSON.stringify({ error: 'Ошибка при обновлении настроек Telegram' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return NextResponse.json({ error: 'Ошибка при обновлении настроек Telegram' }, { status: 500 });
   }
 } 

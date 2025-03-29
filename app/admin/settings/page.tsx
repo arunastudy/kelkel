@@ -16,16 +16,18 @@ export default function SettingsPage() {
 
   const fetchSettings = async () => {
     try {
-      const telegramResponse = await fetch('/api/admin/settings/telegram');
-      const loginResponse = await fetch('/api/admin/settings/credentials');
-
-      const telegramData = await telegramResponse.json();
-      const loginData = await loginResponse.json();
+      const [telegramResponse, loginResponse] = await Promise.all([
+        fetch('/api/admin/settings/telegram'),
+        fetch('/api/admin/settings/credentials')
+      ]);
 
       if (telegramResponse.ok) {
+        const telegramData = await telegramResponse.json();
         setTelegramId(telegramData.telegramId || '');
       }
+
       if (loginResponse.ok) {
+        const loginData = await loginResponse.json();
         setLogin(loginData.login || '');
       }
     } catch (error) {
@@ -47,13 +49,12 @@ export default function SettingsPage() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ telegramId: telegramId.trim() })
+        body: JSON.stringify({ telegramId })
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Ошибка при обновлении настроек');
+        const data = await response.json();
+        throw new Error(data.error || 'Ошибка при обновлении Telegram ID');
       }
 
       // Если есть пароль, обновляем учетные данные
