@@ -34,11 +34,10 @@ function ProductGallery({ images, name, price, t }: { images: any[], name: strin
   
   return (
     <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
-      <Image
+      <img
         src={images[currentIndex]?.url || DEFAULT_PRODUCT_IMAGE}
         alt={name}
-        fill
-        className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
+        className="object-cover object-center group-hover:scale-105 transition-transform duration-300 w-full h-full"
       />
       
       {images.length > 1 && (
