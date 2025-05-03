@@ -267,7 +267,7 @@ export default function ProductsPage() {
         // Обновляем UI, чтобы показать пользователю, что будет использовано изображение по умолчанию
         const defaultImage: ProductImage = {
           id: 'default-temp',
-          url: '/images/product-default.png'
+          url: '/images/product-default.jpg'
         };
         
         setEditingProduct({

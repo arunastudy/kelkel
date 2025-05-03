@@ -13,7 +13,6 @@ const nextConfig = {
         hostname: 'localhost',
       }
     ],
-    unoptimized: process.env.NODE_ENV === 'development',
   },
   typescript: {
     ignoreBuildErrors: true,

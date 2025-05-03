@@ -25,7 +25,7 @@ export async function DELETE(
     }
 
     // Проверяем, не является ли это изображением по умолчанию
-    if (image.url === '/images/product-default.png') {
+    if (image.url === '/images/product-default.jpg') {
       return NextResponse.json(
         { error: 'Невозможно удалить изображение по умолчанию' },
         { status: 400 }
@@ -63,7 +63,7 @@ export async function DELETE(
     if (remainingImages === 0) {
       await prisma.image.create({
         data: {
-          url: '/images/product-default.png',
+          url: '/images/product-default.jpg',
           productId: params.id
         }
       });

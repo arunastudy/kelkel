@@ -12,7 +12,7 @@ import { useLanguageContext } from '@/app/contexts/LanguageContext';
 import Cookies from 'js-cookie';
 import { TranslationKey } from '@/app/i18n/types';
 
-const DEFAULT_PRODUCT_IMAGE = 'https://res.cloudinary.com/your-cloud-name/image/upload/v1/products/product-default.jpg';
+const DEFAULT_PRODUCT_IMAGE = '/images/product-default.jpg';
 
 // Компонент для просмотра галереи изображений товара
 function ProductGallery({ images, name, price, t }: { images: any[], name: string, price: number, t: (key: TranslationKey) => string }) {
