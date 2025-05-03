@@ -3,9 +3,9 @@ import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
 import { uploadImage } from '@/app/utils/cloudinary';
 
-export const DEFAULT_PRODUCT_IMAGE = 'https://res.cloudinary.com/dxtwnmoyn/image/upload/v1743237878/products/jaeffxz0u2puc6t7stfu.png';
-
 const prisma = new PrismaClient();
+
+export const DEFAULT_PRODUCT_IMAGE = '/images/product-default.jpg';
 
 // GET /api/admin/products
 export async function GET(request: NextRequest) {

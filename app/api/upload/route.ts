@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
-
-// Конфигурация Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import path from 'path';
+import { writeFile, mkdir } from 'fs/promises';
 
 // Новый формат конфигурации для Next.js
 export const runtime = 'nodejs';
@@ -36,27 +30,26 @@ export async function POST(request: NextRequest) {
     const urls: string[] = [];
     let fileNumber = 1;
 
+    // Создаем директорию если её нет
+    const publicImagesPath = path.join(process.cwd(), 'public', 'images');
+    await mkdir(publicImagesPath, { recursive: true });
+
     for (const file of files) {
       if (!(file instanceof Blob)) {
         continue;
       }
 
-      // Конвертируем Blob в base64
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const base64 = buffer.toString('base64');
-      const dataURI = `data:${file.type};base64,${base64}`;
+      // Создаем безопасное имя файла
+      const fileName = `${slug}-${fileNumber}-${Date.now()}${path.extname(file.name || '.jpg')}`;
+      const filePath = path.join(publicImagesPath, fileName);
 
-      // Загружаем в Cloudinary
-      const result = await cloudinary.uploader.upload(dataURI, {
-        folder: 'products',
-        public_id: `${slug}-${fileNumber}-${Date.now()}`,
-        transformation: [
-          { width: 800, height: 800, crop: 'limit' },
-          { quality: 'auto:good' }
-        ]
-      });
+      // Конвертируем Blob в Buffer и сохраняем файл
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      await writeFile(filePath, buffer);
 
-      urls.push(result.secure_url);
+      // Добавляем относительный URL в список
+      urls.push(`/images/${fileName}`);
       fileNumber++;
     }
 

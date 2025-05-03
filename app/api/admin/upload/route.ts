@@ -1,16 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
+import path from 'path';
+import { writeFile, mkdir } from 'fs/promises';
 
-// Конфигурация Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,25 +17,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Конвертируем Blob в base64
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const base64 = buffer.toString('base64');
-    const dataURI = `data:${file.type};base64,${base64}`;
+    // Создаем безопасное имя файла
+    const fileName = `${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}${path.extname(file.name || '.jpg')}`;
+    
+    // Путь для сохранения файла
+    const publicImagesPath = path.join(process.cwd(), 'public', 'images');
+    const filePath = path.join(publicImagesPath, fileName);
+    
+    // Создаем директорию если её нет
+    await mkdir(publicImagesPath, { recursive: true });
+    
+    // Конвертируем Blob в Buffer и сохраняем файл
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    await writeFile(filePath, buffer);
 
-    // Генерируем имя файла
-    const fileName = name.toLowerCase().replace(/\s+/g, '-');
-
-    // Загружаем в Cloudinary
-    const result = await cloudinary.uploader.upload(dataURI, {
-      folder: 'products',
-      public_id: `${fileName}-${Date.now()}`,
-      transformation: [
-        { width: 800, height: 800, crop: 'limit' },
-        { quality: 'auto:good' }
-      ]
-    });
-
-    return NextResponse.json({ imageUrl: result.secure_url });
+    // Возвращаем относительный URL для сохранения в БД
+    const imageUrl = `/images/${fileName}`;
+    
+    return NextResponse.json({ imageUrl });
   } catch (error) {
     console.error('Error uploading file:', error);
     return NextResponse.json(
