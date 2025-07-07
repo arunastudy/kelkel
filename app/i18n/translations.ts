@@ -94,6 +94,7 @@ export const translations = {
     reviews: 'Отзывы',
     relatedProducts: 'Похожие товары',
     share: 'Поделиться',
+    noCategories: 'Категории не найдены',
 
     // Сортировка
     sortNameAZ: 'По названию (А-Я)',
@@ -144,6 +145,10 @@ export const translations = {
     enterComment: 'Введите комментарий (необязательно)',
     processing: 'Обработка...',
     placeOrder: 'Оформить заказ',
+
+    // Товары
+    popularProducts: 'Популярные товары',
+    viewCatalog: 'Смотреть каталог',
   },
   ky: {
     // Навигация
@@ -240,6 +245,7 @@ export const translations = {
     reviews: 'Пикирлер',
     relatedProducts: 'Окшош товарлар',
     share: 'Бөлүшүү',
+    noCategories: 'Категориялар табылган жок',
 
     // Сортировка
     sortNameAZ: 'Аты боюнча (А-Я)',
@@ -290,5 +296,9 @@ export const translations = {
     enterComment: 'Комментарий жазыңыз (милдеттүү эмес)',
     processing: 'Иштетилүүдө...',
     placeOrder: 'Буйрутма берүү',
+
+    // Товары
+    popularProducts: 'Популярдуу товарлар',
+    viewCatalog: 'Каталогду көрүү',
   }
 }; 

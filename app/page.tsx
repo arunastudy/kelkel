@@ -21,10 +21,38 @@ import { useLanguageContext } from './contexts/LanguageContext';
 import { LanguageToggle } from './components/LanguageToggle';
 import CategoriesBar from './components/CategoriesBar';
 import ImageCarousel from './components/ImageCarousel';
+import ProductCard from './components/ProductCard';
+import { prisma } from '../lib/prisma';
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  images: { url: string }[];
+  slug: string;
+}
 
 interface FAQItem {
   question: string;
   answer: string;
+}
+
+async function getProducts() {
+  try {
+    const products = await prisma.product.findMany({
+      take: 12,
+      orderBy: {
+        name: 'asc'
+      },
+      include: {
+        images: true
+      }
+    });
+    return products;
+  } catch (error) {
+    console.error('Ошибка при получении товаров:', error);
+    return [];
+  }
 }
 
 export default function Home() {
@@ -32,6 +60,7 @@ export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [carouselImages, setCarouselImages] = useState<string[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const { t } = useLanguageContext();
 
   // Загрузка изображений для карусели
@@ -49,6 +78,21 @@ export default function Home() {
     };
 
     fetchCarouselImages();
+  }, []);
+
+  // Загрузка товаров
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/products/featured');
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error('Ошибка при загрузке товаров:', error);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   // Закрываем меню при изменении размера экрана
@@ -234,6 +278,37 @@ export default function Home() {
 
       {/* Карусель изображений */}
       <ImageCarousel images={carouselImages} />
+
+      {/* Популярные товары */}
+      <section className="py-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            {t('popularProducts')}
+          </h2>
+          <div className="flex overflow-x-auto pb-4 sm:pb-0 gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-5 sm:gap-6 -mx-4 sm:mx-0 px-4 sm:px-0">
+            {products.map((product) => (
+              <div key={product.id} className="w-[280px] flex-none sm:w-auto">
+                <ProductCard
+                  id={product.id}
+                  name={product.name}
+                  price={product.price}
+                  images={product.images}
+                  slug={product.slug}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <Link
+              href="/catalog"
+              className="inline-flex items-center gap-2 text-primary hover:text-primary-dark font-medium"
+            >
+              {t('viewCatalog')}
+              <ChevronDownIcon className="w-4 h-4 rotate-[-90deg]" />
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Мобильное меню */}
       <div 

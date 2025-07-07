@@ -79,33 +79,39 @@ export default function Catalog() {
           <>
             {/* Сетка категорий */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {data?.categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/catalog/${category.id}`}
-                  className="group relative overflow-hidden rounded-2xl bg-white shadow-md hover:shadow-xl transition-all duration-300"
-                >
-                  <div className="absolute inset-0 gradient-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative p-8">
-                    <div className="flex flex-col space-y-4">
-                      <h3 className="text-2xl font-semibold text-gray-900 group-hover:text-white transition-colors">
-                        {category.name}
-                      </h3>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 group-hover:text-white/90 transition-colors">
-                          {category.productsCount} {t('products')}
-                        </span>
-                        <span className="inline-flex items-center text-sm font-semibold text-gray-900 group-hover:text-white transition-colors">
-                          {t('view')}
-                          <svg className="ml-2 w-4 h-4 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </span>
+              {data?.categories?.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-lg text-gray-600">{t('noCategories')}</p>
+                </div>
+              ) : (
+                data?.categories?.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/catalog/${category.id}`}
+                    className="group relative overflow-hidden rounded-2xl bg-white shadow-md hover:shadow-xl transition-all duration-300"
+                  >
+                    <div className="absolute inset-0 gradient-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative p-8">
+                      <div className="flex flex-col space-y-4">
+                        <h3 className="text-2xl font-semibold text-gray-900 group-hover:text-white transition-colors">
+                          {category.name}
+                        </h3>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600 group-hover:text-white/90 transition-colors">
+                            {category.productsCount} {t('products')}
+                          </span>
+                          <span className="inline-flex items-center text-sm font-semibold text-gray-900 group-hover:text-white transition-colors">
+                            {t('view')}
+                            <svg className="ml-2 w-4 h-4 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))
+              )}
             </div>
 
             {/* Пагинация */}

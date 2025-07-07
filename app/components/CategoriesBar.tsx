@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useLanguageContext } from '../contexts/LanguageContext';
+import { useLanguageContext } from '@/app/contexts/LanguageContext';
 
 interface Category {
   id: string;
@@ -20,9 +20,10 @@ export default function CategoriesBar() {
         const response = await fetch('/api/categories');
         if (!response.ok) throw new Error('Failed to fetch categories');
         const data = await response.json();
-        setCategories(data);
+        setCategories(data.categories || []);
       } catch (error) {
         console.error('Error loading categories:', error);
+        setCategories([]);
       }
     };
 

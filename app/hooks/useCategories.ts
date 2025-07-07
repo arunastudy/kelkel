@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Category } from '@/app/types/index';
+
+interface Category {
+  id: string;
+  name: string;
+  description: string | null;
+  slug: string;
+  productsCount: number;
+}
 
 interface CategoriesResponse {
   categories: Category[];
@@ -35,10 +42,23 @@ export function useCategories(
         }
 
         const result = await response.json();
+        
+        // Проверяем структуру ответа
+        if (!result.categories) {
+          throw new Error('Invalid response format');
+        }
+
         setData(result);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
+        // Устанавливаем пустой результат в случае ошибки
+        setData({
+          categories: [],
+          total: 0,
+          totalPages: 1,
+          currentPage: page
+        });
       } finally {
         setIsLoading(false);
       }
