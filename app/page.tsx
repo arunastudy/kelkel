@@ -19,6 +19,7 @@ import Image from 'next/image';
 import { CalendarDateRangeIcon } from '@heroicons/react/24/solid';
 import { useLanguageContext } from './contexts/LanguageContext';
 import { LanguageToggle } from './components/LanguageToggle';
+import CategoriesBar from './components/CategoriesBar';
 
 interface FAQItem {
   question: string;
@@ -28,6 +29,7 @@ interface FAQItem {
 export default function Home() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const { t } = useLanguageContext();
 
   // Закрываем меню при изменении размера экрана
@@ -48,6 +50,7 @@ export default function Home() {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsMobileMenuOpen(false);
+        setIsSearchFocused(false);
         document.body.style.overflow = '';
       }
     };
@@ -88,90 +91,153 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Навигация */}
-      <nav className="bg-white shadow-xl sticky top-0 z-50 backdrop-blur-md bg-white/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
+      <nav 
+        className="sticky top-0 z-40 backdrop-blur-md bg-white/80 border-b border-gray-100"
+        onClick={(e) => {
+          const target = e.target as HTMLElement;
+          if (!target.closest('.search-container')) {
+            setIsSearchFocused(false);
+          }
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            {/* Логотип */}
+            <Link href="/" className="flex-shrink-0" onClick={closeMobileMenu}>
                 <Image
                   src="/images/logo.svg"
                   alt="АПАКАЙ"
                   width={40}
                   height={40}
-                  className="w-auto h-8"
+                className="w-auto h-6 sm:h-8"
                 />
-                <span className="text-2xl font-bold gradient-text">
-                  АПАКАЙ
-                </span>
               </Link>
+
+            {/* Правая часть (поиск и навигация) */}
+            <div className="flex items-center gap-2 sm:gap-8 flex-1 justify-end">
+              {/* Поисковая строка */}
+              <div className="max-w-xl w-full hidden sm:block">
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    placeholder={t('search')}
+                    className="w-full h-9 sm:h-10 pl-3 sm:pl-4 pr-10 sm:pr-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-0 focus:border-primary focus:shadow-[0_0_0_2px_var(--gradient-start)] transition-all duration-200 bg-white relative z-50 text-sm"
+                    onFocus={() => setIsSearchFocused(true)}
+                  />
+                  <button className="absolute right-2 sm:right-3 text-gray-400 hover:text-primary z-50">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </button>
+                </div>
             </div>
-            <div className="hidden md:flex items-center space-x-4">
+
+              {/* Навигация */}
+              <div className="flex items-center space-x-1 sm:space-x-6">
               <LanguageToggle />
-              <Link href="/catalog" className="flex items-center space-x-2 px-4 py-2 rounded-lg gradient-primary gradient-hover text-white transition-all duration-300 shadow-md">
-                <ShoppingBagIcon className="h-6 w-6" />
-                <span>{t('catalog')}</span>
+                
+                {/* Каталог - скрыть на мобильных */}
+                <Link 
+                  href="/catalog" 
+                  className="hidden sm:flex items-center space-x-1 transition-colors hover:text-primary"
+                >
+                  <ShoppingBagIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <span className="text-sm font-medium">{t('catalog')}</span>
+                </Link>
+
+                {/* Избранное - скрыть на мобильных */}
+                <Link 
+                  href="/favorites" 
+                  className="hidden sm:flex items-center space-x-1 transition-colors hover:text-primary"
+                >
+                  <HeartIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <span className="text-sm font-medium">{t('favorites')}</span>
               </Link>
-              <Link href="/cart" className="flex items-center space-x-2 px-4 py-2 rounded-lg gradient-primary gradient-hover text-white transition-all duration-300 shadow-md">
-                <ShoppingCartIcon className="h-6 w-6" />
-                <span>{t('cart')}</span>
+
+                {/* Корзина - показывать всегда */}
+                <Link 
+                  href="/cart" 
+                  className="flex items-center space-x-1 transition-colors hover:text-primary p-1 sm:p-0"
+                >
+                  <ShoppingCartIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <span className="hidden sm:inline text-sm font-medium">{t('cart')}</span>
               </Link>
-            </div>
+
             {/* Кнопка мобильного меню */}
-            <div className="md:hidden flex items-center">
               <button 
                 onClick={toggleMobileMenu}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="sm:hidden p-1 rounded-lg hover:bg-gray-100"
                 aria-label={isMobileMenuOpen ? t('closeMenu') : t('openMenu')}
               >
                 {isMobileMenuOpen ? (
-                  <XMarkIcon className="h-6 w-6" />
+                    <XMarkIcon className="h-5 w-5" />
                 ) : (
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 )}
               </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Мобильная поисковая строка */}
+          <div className="sm:hidden py-2">
+            <div className="flex items-center gap-2">
+              <div className="relative search-container flex-1">
+                <input
+                  type="text"
+                  placeholder={t('search')}
+                  className="w-full h-9 pl-3 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-0 focus:border-primary focus:shadow-[0_0_0_2px_var(--gradient-start)] transition-all duration-200 bg-white relative z-50 text-sm"
+                  onFocus={() => setIsSearchFocused(true)}
+                />
+                <button className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary z-50">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </div>
+              <Link 
+                href="/catalog"
+                className="flex items-center justify-center h-9 w-9 rounded-lg border border-gray-300 hover:border-primary hover:text-primary transition-colors"
+              >
+                <ShoppingBagIcon className="h-5 w-5" />
+              </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Мобильное меню (вне навигации) */}
+      {/* Категории */}
+      <div className="bg-white border-b border-gray-100">
+        <CategoriesBar />
+      </div>
+
+      {/* Мобильное меню */}
       <div 
         className={`
-          fixed inset-0 z-50 md:hidden
-          ${isMobileMenuOpen ? 'visible' : 'invisible'}
-          transition-visibility duration-300
+          fixed inset-0 bg-black/50 z-50 transition-opacity duration-300
+          ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
         `}
+        onClick={closeMobileMenu}
       >
-        {/* Затемнение фона */}
         <div 
           className={`
-            absolute inset-0 bg-gray-900/50 backdrop-blur-sm
-            ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'}
-            transition-opacity duration-300
-          `}
-          onClick={closeMobileMenu}
-        />
-        
-        {/* Панель меню */}
-        <div 
-          className={`
-            absolute right-0 top-0 h-full w-64 bg-white shadow-2xl
-            transform transition-transform duration-300 ease-in-out
+            fixed right-0 top-0 h-full w-[280px] max-w-[85vw] bg-white transform transition-transform duration-300
             ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}
           `}
+          onClick={e => e.stopPropagation()}
         >
           <div className="flex flex-col h-full">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-8">
-                <span className="text-xl font-bold text-gray-900">{t('menu')}</span>
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-lg font-bold text-gray-900">{t('menu')}</span>
                 <button 
                   onClick={closeMobileMenu}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="p-1 rounded-lg hover:bg-gray-100"
                   aria-label={t('closeMenu')}
                 >
-                  <XMarkIcon className="h-6 w-6" />
+                  <XMarkIcon className="h-5 w-5" />
                 </button>
               </div>
               <div className="space-y-4">
@@ -180,19 +246,27 @@ export default function Home() {
                 </div>
                 <Link 
                   href="/catalog" 
-                  className="flex items-center space-x-2 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2.5 rounded-lg hover:bg-gray-100"
                   onClick={closeMobileMenu}
                 >
-                  <ShoppingBagIcon className="h-6 w-6 text-primary" />
-                  <span className="font-medium">{t('catalog')}</span>
+                  <ShoppingBagIcon className="h-5 w-5 text-primary" />
+                  <span className="font-medium text-sm">{t('catalog')}</span>
+                </Link>
+                <Link 
+                  href="/favorites" 
+                  className="flex items-center space-x-2 px-3 py-2.5 rounded-lg hover:bg-gray-100"
+                  onClick={closeMobileMenu}
+                >
+                  <HeartIcon className="h-5 w-5 text-primary" />
+                  <span className="font-medium text-sm">{t('favorites')}</span>
                 </Link>
                 <Link 
                   href="/cart" 
-                  className="flex items-center space-x-2 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2.5 rounded-lg hover:bg-gray-100"
                   onClick={closeMobileMenu}
                 >
-                  <ShoppingCartIcon className="h-6 w-6 text-primary" />
-                  <span className="font-medium">{t('cart')}</span>
+                  <ShoppingCartIcon className="h-5 w-5 text-primary" />
+                  <span className="font-medium text-sm">{t('cart')}</span>
                 </Link>
               </div>
             </div>

@@ -8,6 +8,8 @@ const pool = new Pool({
 
 const prisma = new PrismaClient();
 
+export default prisma;
+
 export async function getCategories(
   search: string,
   page: number,

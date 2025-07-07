@@ -1,26 +1,74 @@
 'use client';
 
 import { useLanguageContext } from '../contexts/LanguageContext';
-import { LanguageIcon } from '@heroicons/react/24/outline';
+import { LanguageIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { useState, useRef, useEffect } from 'react';
 
 export function LanguageToggle() {
   const { language, toggleLanguage } = useLanguageContext();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLanguageChange = (newLang: 'ru' | 'ky') => {
+    if (language !== newLang) {
+      toggleLanguage();
+    }
+    setIsOpen(false);
+  };
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="relative" ref={dropdownRef}>
       <button
-        onClick={toggleLanguage}
-        className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-300 ${
-          language === 'ru'
-            ? 'bg-primary text-white shadow-lg'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-        }`}
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+        aria-expanded={isOpen}
       >
-        <LanguageIcon className="h-5 w-5" />
-        <span className="font-medium">
+        <LanguageIcon className="h-5 w-5 text-gray-600" />
+        <span className="font-medium text-gray-700">
           {language === 'ru' ? 'RU' : 'KG'}
         </span>
+        <ChevronDownIcon className={`h-4 w-4 text-gray-600 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
+
+      {/* Dropdown menu */}
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-32 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+          <div className="py-1">
+            <button
+              onClick={() => handleLanguageChange('ru')}
+              className={`w-full flex items-center px-4 py-2 text-sm ${
+                language === 'ru'
+                  ? 'text-primary bg-gray-50 font-medium'
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Русский
+            </button>
+            <button
+              onClick={() => handleLanguageChange('ky')}
+              className={`w-full flex items-center px-4 py-2 text-sm ${
+                language === 'ky'
+                  ? 'text-primary bg-gray-50 font-medium'
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Кыргызча
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

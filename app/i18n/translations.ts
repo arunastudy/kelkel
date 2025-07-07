@@ -7,6 +7,7 @@ export const translations = {
     closeMenu: 'Закрыть меню',
     openMenu: 'Открыть меню',
     close: 'Закрыть',
+    favorites: 'Избранное',
 
     // Главный баннер
     welcome: 'Добро пожаловать в АПАКАЙ',
@@ -152,6 +153,7 @@ export const translations = {
     closeMenu: 'Менюну жабуу',
     openMenu: 'Менюну ачуу',
     close: 'Жабуу',
+    favorites: 'Тандалгандар',
 
     // Главный баннер
     welcome: 'АПАКАЙ\'га кош келиңиз',

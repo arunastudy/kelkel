@@ -144,7 +144,7 @@ export default function OrderForm({ cartItems, totalSum, onClose }: OrderFormPro
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 shadow-sm focus:border-primary focus:ring-primary transition-all duration-300 hover:bg-white/80"
+                  className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm focus:border-primary focus:ring-primary transition-all duration-300"
                   placeholder={t('enterFullName')}
                 />
               </div>
@@ -154,7 +154,7 @@ export default function OrderForm({ cartItems, totalSum, onClose }: OrderFormPro
                   {t('contactType')}
                 </label>
                 <div className="grid grid-cols-2 gap-4">
-                  <label className="relative flex cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white/50 p-3 shadow-sm focus-within:border-primary hover:bg-white/80 transition-all duration-300">
+                  <label className="relative flex cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white p-3 shadow-sm focus-within:border-primary transition-all duration-300">
                     <input
                       type="radio"
                       name="contactType"
@@ -170,7 +170,7 @@ export default function OrderForm({ cartItems, totalSum, onClose }: OrderFormPro
                       <span className="absolute inset-0 border-2 border-primary rounded-xl"></span>
                     )}
                   </label>
-                  <label className="relative flex cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white/50 p-3 shadow-sm focus-within:border-primary hover:bg-white/80 transition-all duration-300">
+                  <label className="relative flex cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white p-3 shadow-sm focus-within:border-primary transition-all duration-300">
                     <input
                       type="radio"
                       name="contactType"
@@ -200,7 +200,7 @@ export default function OrderForm({ cartItems, totalSum, onClose }: OrderFormPro
                   required
                   value={formData.phone}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 shadow-sm focus:border-primary focus:ring-primary transition-all duration-300 hover:bg-white/80"
+                  className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm focus:border-primary focus:ring-primary transition-all duration-300"
                   placeholder={t('enterPhone')}
                 />
               </div>

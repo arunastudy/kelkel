@@ -1,16 +1,15 @@
 import { NextResponse } from 'next/server';
-import { getCategories } from '@/app/lib/db';
+import prisma from '@/app/lib/db';
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const search = searchParams.get('search') || '';
-  const page = parseInt(searchParams.get('page') || '1');
-  const sortBy = searchParams.get('sortBy') || 'name';
-  const sortOrder = (searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc';
-
+export async function GET() {
   try {
-    const result = await getCategories(search, page, 12, sortBy, sortOrder);
-    return NextResponse.json(result);
+    const categories = await prisma.category.findMany({
+      orderBy: {
+        name: 'asc'
+      }
+    });
+
+    return NextResponse.json(categories);
   } catch (error) {
     console.error('Error fetching categories:', error);
     return NextResponse.json(
