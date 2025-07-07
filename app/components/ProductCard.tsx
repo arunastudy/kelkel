@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { HeartIcon, ShoppingCartIcon, MinusIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useLanguageContext } from '../contexts/LanguageContext';
 import Cookies from 'js-cookie';
+import FavoriteButton from './FavoriteButton';
 
 interface ProductCardProps {
   id: string;
@@ -68,68 +69,68 @@ export default function ProductCard({ id, name, price, images, slug }: ProductCa
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className="group relative">
       <Link href={`/product/${slug}`} className="block">
-        <div className="relative h-48 rounded-t-lg overflow-hidden">
-          <Image
-            src={images[0]?.url || '/images/placeholder.jpg'}
-            alt={name}
-            fill
-            className="object-cover"
-          />
+        <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
+          {images && images[0] && (
+            <Image
+              src={images[0].url}
+              alt={name}
+              fill
+              className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
+              sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
+            />
+          )}
         </div>
-        <div className="p-4">
-          <h3 className="text-sm font-medium text-gray-900 line-clamp-2 min-h-[40px]">
-            {name}
-          </h3>
-          <div className="mt-2 flex items-center justify-between">
-            <div>
-              <p className="text-lg font-bold text-gray-900">
-                {price.toLocaleString()} {t('currency')}
-              </p>
-            </div>
-          </div>
+        <div className="mt-4 space-y-2">
+          <h3 className="text-sm font-medium text-gray-900 line-clamp-2">{name}</h3>
+          <p className="text-sm font-medium text-gray-900">{price.toLocaleString('ru-RU')} {t('currency')}</p>
         </div>
       </Link>
-      <div className="px-4 pb-4 flex items-center justify-between">
+      <div className="pr-4 pb-4 flex items-center justify-between">
         {quantity > 0 ? (
-          <div className="flex items-center justify-between p-2 rounded-lg gradient-primary text-white w-full">
-            <button
-              onClick={() => updateQuantity(-1)}
-              className="p-1 rounded-full hover:bg-white/10 transition-colors"
-              aria-label={t('decreaseQuantity')}
-            >
-              <MinusIcon className="h-5 w-5" />
-            </button>
-            <span className="font-medium">{quantity}</span>
-            <button
-              onClick={() => updateQuantity(1)}
-              className="p-1 rounded-full hover:bg-white/10 transition-colors"
-              aria-label={t('increaseQuantity')}
-            >
-              <PlusIcon className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => updateQuantity(-quantity)}
-              className="p-1 rounded-full hover:bg-white/10 transition-colors ml-2"
-              aria-label={t('removeFromCart')}
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
+          <div className="flex items-center w-full">
+            <div className="flex items-center justify-between p-2 h-10 rounded-lg gradient-primary text-white flex-grow mr-2">
+              <button
+                onClick={() => updateQuantity(-1)}
+                className="p-1 rounded-full hover:bg-white/10 transition-colors"
+                aria-label={t('decreaseQuantity')}
+              >
+                <MinusIcon className="h-5 w-5" />
+              </button>
+              <span className="font-medium">{quantity}</span>
+              <button
+                onClick={() => updateQuantity(1)}
+                className="p-1 rounded-full hover:bg-white/10 transition-colors"
+                aria-label={t('increaseQuantity')}
+              >
+                <PlusIcon className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => updateQuantity(-quantity)}
+                className="p-1 rounded-full hover:bg-white/10 transition-colors ml-2"
+                aria-label={t('removeFromCart')}
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="w-10 flex-shrink-0">
+              <FavoriteButton productId={id} />
+            </div>
           </div>
         ) : (
-          <>
+          <div className="flex items-center w-full">
             <button 
               onClick={() => updateQuantity(1)}
-              className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors duration-200 flex-grow mr-2 flex items-center justify-center space-x-2"
+              className="bg-primary text-white h-10 px-6 rounded-lg hover:bg-primary-dark transition-colors duration-200 flex-grow mr-2 flex items-center justify-center space-x-2"
             >
               <ShoppingCartIcon className="h-4 w-4" />
               <span className="text-sm">{t('addToCart')}</span>
             </button>
-            <button className="p-2 text-gray-400 hover:text-primary border border-gray-200 rounded-lg transition-colors duration-200">
-              <HeartIcon className="w-5 h-5" />
-            </button>
-          </>
+            <div className="w-10 flex-shrink-0">
+              <FavoriteButton productId={id} />
+            </div>
+          </div>
         )}
       </div>
     </div>
