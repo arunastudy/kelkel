@@ -149,6 +149,10 @@ export const translations = {
     // Товары
     popularProducts: 'Популярные товары',
     viewCatalog: 'Смотреть каталог',
+
+    // Новые поля для поиска
+    searchResults: 'Результаты поиска',
+    noResults: 'По вашему запросу ничего не найдено',
   },
   ky: {
     // Навигация
@@ -300,5 +304,9 @@ export const translations = {
     // Товары
     popularProducts: 'Популярдуу товарлар',
     viewCatalog: 'Каталогду көрүү',
+
+    // Новые поля для поиска
+    searchResults: 'Издөө жыйынтыктары',
+    noResults: 'Сиздин сурамыңыз боюнча эч нерсе табылган жок',
   }
 }; 

@@ -23,6 +23,7 @@ import CategoriesBar from './components/CategoriesBar';
 import ImageCarousel from './components/ImageCarousel';
 import ProductCard from './components/ProductCard';
 import { prisma } from '../lib/prisma';
+import SearchBar from '@/app/components/SearchBar';
 
 interface Product {
   id: string;
@@ -61,6 +62,8 @@ export default function Home() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [carouselImages, setCarouselImages] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
   const { t } = useLanguageContext();
 
   // Загрузка изображений для карусели
@@ -94,6 +97,28 @@ export default function Home() {
 
     fetchProducts();
   }, []);
+
+  // Поиск товаров
+  useEffect(() => {
+    const searchProducts = async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/products?search=${encodeURIComponent(searchQuery)}`);
+        const data = await response.json();
+        setSearchResults(data.products || []);
+      } catch (error) {
+        console.error('Ошибка при поиске товаров:', error);
+        setSearchResults([]);
+      }
+    };
+
+    const debounceTimeout = setTimeout(searchProducts, 300);
+    return () => clearTimeout(debounceTimeout);
+  }, [searchQuery]);
 
   // Закрываем меню при изменении размера экрана
   useEffect(() => {
@@ -151,6 +176,10 @@ export default function Home() {
     document.body.style.overflow = '';
   };
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Навигация */}
@@ -180,20 +209,13 @@ export default function Home() {
             <div className="flex items-center gap-2 sm:gap-8 flex-1 justify-end">
               {/* Поисковая строка */}
               <div className="max-w-xl w-full hidden sm:block">
-                <div className="relative flex items-center">
-                  <input
-                    type="text"
-                    placeholder={t('search')}
-                    className="w-full h-9 sm:h-10 pl-3 sm:pl-4 pr-10 sm:pr-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-0 focus:border-primary focus:shadow-[0_0_0_2px_var(--gradient-start)] transition-all duration-200 bg-white relative z-50 text-sm"
-                    onFocus={() => setIsSearchFocused(true)}
-                  />
-                  <button className="absolute right-2 sm:right-3 text-gray-400 hover:text-primary z-50">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </button>
-                </div>
-            </div>
+                <SearchBar
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder={t('search')}
+                  onSearch={handleSearch}
+                />
+              </div>
 
               {/* Навигация */}
               <div className="flex items-center space-x-1 sm:space-x-6">
@@ -248,17 +270,12 @@ export default function Home() {
           <div className="sm:hidden py-2">
             <div className="flex items-center gap-2">
               <div className="relative search-container flex-1">
-                <input
-                  type="text"
+                <SearchBar
+                  value={searchQuery}
+                  onChange={setSearchQuery}
                   placeholder={t('search')}
-                  className="w-full h-9 pl-3 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-0 focus:border-primary focus:shadow-[0_0_0_2px_var(--gradient-start)] transition-all duration-200 bg-white relative z-50 text-sm"
-                  onFocus={() => setIsSearchFocused(true)}
+                  onSearch={handleSearch}
                 />
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary z-50">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </button>
               </div>
               <Link 
                 href="/catalog"
@@ -276,39 +293,69 @@ export default function Home() {
         <CategoriesBar />
       </div>
 
-      {/* Карусель изображений */}
-      <ImageCarousel images={carouselImages} />
-
-      {/* Популярные товары */}
-      <section className="py-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            {t('popularProducts')}
-          </h2>
-          <div className="flex overflow-x-auto pb-4 sm:pb-0 gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-5 sm:gap-6 -mx-4 sm:mx-0 px-4 sm:px-0">
-            {products.map((product) => (
-              <div key={product.id} className="w-[280px] flex-none sm:w-auto">
-                <ProductCard
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  images={product.images}
-                  slug={product.slug}
-                />
+      {searchQuery ? (
+        /* Результаты поиска */
+        <section className="py-8 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              {t('searchResults')}
+            </h2>
+            {searchResults.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                {searchResults.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    images={product.images}
+                    slug={product.slug}
+                  />
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500">{t('noResults')}</p>
+              </div>
+            )}
           </div>
-          <div className="mt-8 text-center">
-            <Link
-              href="/catalog"
-              className="inline-flex items-center gap-2 text-primary hover:text-primary-dark font-medium"
-            >
-              {t('viewCatalog')}
-              <ChevronDownIcon className="w-4 h-4 rotate-[-90deg]" />
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <>
+          {/* Карусель изображений */}
+          <ImageCarousel images={carouselImages} />
+
+          {/* Популярные товары */}
+          <section className="py-8 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                {t('popularProducts')}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    images={product.images}
+                    slug={product.slug}
+                  />
+                ))}
+              </div>
+              <div className="mt-8 text-center">
+                <Link
+                  href="/catalog"
+                  className="inline-flex items-center gap-2 text-primary hover:text-primary-dark font-medium"
+                >
+                  {t('viewCatalog')}
+                  <ChevronDownIcon className="w-4 h-4 rotate-[-90deg]" />
+                </Link>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
 
       {/* Мобильное меню */}
       <div 
