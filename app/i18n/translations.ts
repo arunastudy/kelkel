@@ -152,13 +152,11 @@ export const translations = {
 
     // Новые поля для поиска
     searchResults: 'Результаты поиска',
-    noResults: 'По вашему запросу ничего не найдено',
-
-    // Избранное
-    noFavorites: 'В избранном пока ничего нет',
-    noFavoritesDesc: 'Добавляйте товары в избранное, чтобы сохранить их для будущих покупок',
-    addToFavorites: 'Добавить в избранное',
-    removeFromFavorites: 'Удалить из избранного',
+    foundProducts: 'Найдено товаров: {{count}}',
+    noProductsFound: 'Товары не найдены',
+    startSearching: 'Начните поиск',
+    searchDescription: 'Введите название товара или его описание',
+    tryAnotherSearch: 'Попробуйте изменить поисковый запрос',
   },
   ky: {
     // Навигация
@@ -313,7 +311,12 @@ export const translations = {
 
     // Новые поля для поиска
     searchResults: 'Издөө жыйынтыктары',
-    noResults: 'Сиздин сурамыңыз боюнча эч нерсе табылган жок',
+    foundProducts: 'Табылган товарлар: {{count}}',
+    noProductsFound: 'Товарлар табылган жок',
+    startSearching: 'Издөөнү баштаңыз',
+    searchDescription: 'Товардын атын же сүрөттөмөсүн киргизиңиз',
+    noResults: 'Эч нерсе табылган жок',
+    tryAnotherSearch: 'Издөө сөзүн өзгөртүп көрүңүз',
 
     // Избранное
     noFavorites: 'Тандалгандарда азырынча эч нерсе жок',

@@ -1,23 +1,39 @@
 import { NextResponse } from 'next/server';
-import { getProducts } from '@/app/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const categoryId = searchParams.get('categoryId') || '';
-  const search = searchParams.get('search') || '';
-  const page = parseInt(searchParams.get('page') || '1');
-  const sortBy = searchParams.get('sortBy') || 'name';
-  const sortOrder = (searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc';
-  const filters = JSON.parse(searchParams.get('filters') || '{}');
-
   try {
-    const result = await getProducts(categoryId, search, page, 12, sortBy, sortOrder, filters);
-    return NextResponse.json(result);
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search');
+
+    if (!search) {
+      return NextResponse.json({ products: [] });
+    }
+
+    const products = await prisma.product.findMany({
+      where: {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        images: {
+          select: {
+            url: true,
+          },
+        },
+        slug: true,
+      },
+      take: 20,
+    });
+
+    return NextResponse.json({ products });
   } catch (error) {
-    console.error('Error fetching products:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch products' },
-      { status: 500 }
-    );
+    console.error('Error searching products:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 } 

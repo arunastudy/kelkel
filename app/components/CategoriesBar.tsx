@@ -7,7 +7,6 @@ import { useLanguageContext } from '@/app/contexts/LanguageContext';
 interface Category {
   id: string;
   name: string;
-  slug: string;
 }
 
 export default function CategoriesBar() {
@@ -38,7 +37,7 @@ export default function CategoriesBar() {
         {categories.map((category) => (
           <Link
             key={category.id}
-            href={`/catalog/${category.slug}`}
+            href={`/catalog/${category.id}`}
             className="flex-shrink-0 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm text-gray-600 
                      border border-gray-200 rounded-full hover:bg-gray-50 
                      hover:border-gray-300 transition-colors whitespace-nowrap

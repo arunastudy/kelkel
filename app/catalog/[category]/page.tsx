@@ -11,6 +11,8 @@ import { useProducts } from '@/app/hooks/useProducts';
 import { useLanguageContext } from '@/app/contexts/LanguageContext';
 import Cookies from 'js-cookie';
 import { TranslationKey } from '@/app/i18n/types';
+import ProductCard from '@/app/components/ProductCard';
+import Link from 'next/link';
 
 const DEFAULT_PRODUCT_IMAGE = '/images/product-default.jpg';
 
@@ -95,8 +97,24 @@ export default function CategoryPage({ params }: { params: { category: string } 
   const [sort, setSort] = useState('name-asc');
   const [sortField, sortOrder] = sort.split('-') as [string, 'asc' | 'desc'];
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
-  const [cart, setCart] = useState<{ [key: string]: number }>({});
   const { t } = useLanguageContext();
+  const [categoryName, setCategoryName] = useState<string>('');
+
+  // Загружаем название категории
+  useEffect(() => {
+    const fetchCategoryName = async () => {
+      try {
+        const response = await fetch(`/api/categories/${params.category}`);
+        if (!response.ok) throw new Error('Failed to fetch category');
+        const data = await response.json();
+        setCategoryName(data.name);
+      } catch (error) {
+        console.error('Error loading category:', error);
+      }
+    };
+
+    fetchCategoryName();
+  }, [params.category]);
 
   const sortOptions = [
     { value: 'name-asc', label: t('sortNameAZ') },
@@ -117,20 +135,14 @@ export default function CategoryPage({ params }: { params: { category: string } 
     }
   ];
 
-  useEffect(() => {
-    const savedCart = Cookies.get('cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (Object.keys(cart).length > 0) {
-      Cookies.set('cart', JSON.stringify(cart), { expires: 7 });
-    } else {
-      Cookies.remove('cart');
-    }
-  }, [cart]);
+  // Обработчик изменения фильтров
+  const handleFilterChange = (groupId: string, values: string[]) => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      [groupId]: values
+    }));
+    setPage(1); // Сбрасываем страницу при изменении фильтров
+  };
 
   const { data: productsData, isLoading: isProductsLoading, error: productsError } = useProducts(
     params.category,
@@ -141,74 +153,23 @@ export default function CategoryPage({ params }: { params: { category: string } 
     selectedFilters
   );
 
-  const updateQuantity = (productId: string, delta: number, price: number, product: any) => {
-    setCart(prev => {
-      const newCart = { ...prev };
-      const newQuantity = (prev[productId] || 0) + delta;
-      
-      if (newQuantity <= 0) {
-        delete newCart[productId];
-      } else {
-        newCart[productId] = newQuantity;
-      }
-
-      // Сохраняем детали товара
-      const productDetails = JSON.parse(localStorage.getItem('productDetails') || '{}');
-      productDetails[productId] = {
-        name: product.name,
-        description: product.description,
-        images: product.images,
-      };
-      localStorage.setItem('productDetails', JSON.stringify(productDetails));
-
-      // Вызываем событие обновления корзины с ценой товара
-      window.dispatchEvent(new CustomEvent('cartUpdate', {
-        detail: {
-          cartData: newCart,
-          productId,
-          price
-        }
-      }));
-      
-      return newCart;
-    });
-  };
-
-  const removeFromCart = (productId: string, price: number, product: any) => {
-    setCart(prev => {
-      const newCart = { ...prev };
-      delete newCart[productId];
-
-      // Вызываем событие обновления корзины с ценой товара
-      window.dispatchEvent(new CustomEvent('cartUpdate', {
-        detail: {
-          cartData: newCart,
-          productId,
-          price
-        }
-      }));
-
-      return newCart;
-    });
-  };
-
   // Фильтруем товары, чтобы показывать только доступные (isAvailable: true)
   const filteredProducts = productsData?.products.filter(product => product.isAvailable) || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Баннер категории */}
-      <div className="relative gradient-primary text-white py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-5"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold capitalize">
-              {productsData?.products[0]?.category?.name || t('loading')}
-            </h1>
+      {/* Баннер */}
+      <div className="relative bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+            <Link href="/catalog" className="hover:text-primary">
+              {t('catalog')}
+            </Link>
+            <span>/</span>
+            <span>{categoryName || ''}</span>
           </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{categoryName || ''}</h1>
         </div>
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -217,104 +178,55 @@ export default function CategoryPage({ params }: { params: { category: string } 
           <div className="lg:col-span-1">
             <div className="sticky top-8">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('filters')}</h2>
-              <Filters
-                groups={filterGroups}
-                selectedFilters={selectedFilters}
-                onChange={(groupId, values) => {
-                  setSelectedFilters(prev => ({
-                    ...prev,
-                    [groupId]: values
-                  }));
-                  setPage(1);
-                }}
-              />
+              <div className="space-y-6">
+                <div>
+                  <SearchBar
+                    value={search}
+                    onChange={(value) => {
+                      setSearch(value);
+                      setPage(1); // Сбрасываем страницу при поиске
+                    }}
+                    placeholder={t('searchProducts')}
+                  />
+                </div>
+                <div>
+                  <SortSelect
+                    value={sort}
+                    onChange={(value) => {
+                      setSort(value);
+                      setPage(1); // Сбрасываем страницу при изменении сортировки
+                    }}
+                    options={sortOptions}
+                  />
+                </div>
+                <Filters
+                  groups={filterGroups}
+                  selectedFilters={selectedFilters}
+                  onChange={handleFilterChange}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Основной контент */}
+          {/* Основной контент с товарами */}
           <div className="lg:col-span-3">
-            {/* Панель управления */}
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8">
-              <div className="w-full sm:w-96">
-                <SearchBar
-                  value={search}
-                  onChange={(value) => {
-                    setSearch(value);
-                    setPage(1);
-                  }}
-                  placeholder={t('searchProducts')}
-                />
-              </div>
-              <div className="w-full sm:w-64">
-                <SortSelect
-                  value={sort}
-                  onChange={setSort}
-                  options={sortOptions}
-                />
-              </div>
-            </div>
-
-            {productsError && (
-              <div className="text-center py-12 text-red-600">
-                {t('error')}
-              </div>
-            )}
-
+            {/* Сетка товаров */}
             {isProductsLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
               </div>
             ) : (
               <>
-                {/* Сетка товаров */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredProducts.map((product) => (
-                    <div key={product.id} className="group relative">
-                      <ProductGallery 
-                        images={product.images || []} 
-                        name={product.name}
-                        price={product.price}
-                        t={t}
-                      />
-                      <div className="mt-4 space-y-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-                        <p className="text-gray-600">{product.description}</p>
-                        {cart[product.id] ? (
-                          <div className="flex items-center justify-between p-2 rounded-lg gradient-primary text-white">
-                            <button
-                              onClick={() => updateQuantity(product.id.toString(), -1, product.price, product)}
-                              className="p-1 rounded-full hover:bg-white/10 transition-colors"
-                              aria-label={t('decreaseQuantity')}
-                            >
-                              <MinusIcon className="h-5 w-5" />
-                            </button>
-                            <span className="font-medium">{cart[product.id]}</span>
-                            <button
-                              onClick={() => updateQuantity(product.id.toString(), 1, product.price, product)}
-                              className="p-1 rounded-full hover:bg-white/10 transition-colors"
-                              aria-label={t('increaseQuantity')}
-                            >
-                              <PlusIcon className="h-5 w-5" />
-                            </button>
-                            <button
-                              onClick={() => removeFromCart(product.id.toString(), product.price, product)}
-                              className="p-1 rounded-full hover:bg-white/10 transition-colors ml-2"
-                              aria-label={t('removeFromCart')}
-                            >
-                              <XMarkIcon className="h-5 w-5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => updateQuantity(product.id.toString(), 1, product.price, product)}
-                            className="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg gradient-primary gradient-hover text-white transition-all duration-300 shadow-md hover:shadow-xl"
-                          >
-                            <ShoppingCartIcon className="h-5 w-5" />
-                            <span>{t('addToCart')}</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                    <ProductCard
+                      key={product.id}
+                      id={product.id}
+                      name={product.name}
+                      price={product.price}
+                      images={product.images}
+                      slug={product.slug}
+                    />
                   ))}
                 </div>
 

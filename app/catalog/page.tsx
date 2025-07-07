@@ -25,19 +25,13 @@ export default function Catalog() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Баннер категорий */}
-      <div className="relative gradient-primary text-white py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-5"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold">{t('catalog')}</h1>
-          </div>
-          <p className="text-lg md:text-xl text-center max-w-2xl mx-auto">
+      <div className="relative bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{t('catalog')}</h1>
+          <p className="mt-4 text-lg text-gray-600">
             {t('selectCategory')}
           </p>
         </div>
-        {/* Декоративные элементы */}
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
       </div>
 
       {/* Панель управления */}
