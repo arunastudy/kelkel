@@ -5,6 +5,10 @@ import { jwtVerify } from 'jose';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export async function middleware(request: NextRequest) {
+  // Добавляем путь в заголовки
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', request.nextUrl.pathname);
+
   const isAdminPage = request.nextUrl.pathname.startsWith('/admin');
   const isMainAdminPage = request.nextUrl.pathname === '/admin';
   const isApiAuthRoute = request.nextUrl.pathname === '/api/admin/auth/login';
@@ -16,7 +20,12 @@ export async function middleware(request: NextRequest) {
 
   // Пропускаем запросы к API авторизации и страницу логина
   if (isApiAuthRoute || isLoginPage) {
-    return NextResponse.next();
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+    return response;
   }
 
   // Получаем токен из куки
@@ -59,7 +68,11 @@ export async function middleware(request: NextRequest) {
     language = 'ru';
   }
 
-  const response = NextResponse.next();
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 
   // Устанавливаем cookie с языком, если его нет
   if (!request.cookies.has('preferred_language')) {

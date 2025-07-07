@@ -1,5 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Product } from '@/app/types';
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  categoryId: string;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  images: {
+    id: number;
+    url: string;
+  }[];
+  isAvailable: boolean;
+}
 
 interface ProductsResponse {
   products: Product[];
@@ -23,6 +41,8 @@ export function useProducts(
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
+      setError(null);
+
       try {
         const params = new URLSearchParams({
           categoryId,
@@ -40,16 +60,17 @@ export function useProducts(
 
         const result = await response.json();
         setData(result);
-        setError(null);
       } catch (err) {
+        console.error('Error fetching products:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
+        setData(null);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProducts();
-  }, [categoryId, search, page, sortBy, sortOrder, filters]);
+  }, [categoryId, search, page, sortBy, sortOrder, JSON.stringify(filters)]);
 
   return { data, isLoading, error };
 } 

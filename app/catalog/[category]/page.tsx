@@ -100,6 +100,15 @@ export default function CategoryPage({ params }: { params: { category: string } 
   const { t } = useLanguageContext();
   const [categoryName, setCategoryName] = useState<string>('');
 
+  const { data: productsData, isLoading: isProductsLoading, error: productsError } = useProducts(
+    params.category,
+    search,
+    page,
+    sortField,
+    sortOrder,
+    selectedFilters
+  );
+
   // Загружаем название категории
   useEffect(() => {
     const fetchCategoryName = async () => {
@@ -135,26 +144,24 @@ export default function CategoryPage({ params }: { params: { category: string } 
     }
   ];
 
-  // Обработчик изменения фильтров
   const handleFilterChange = (groupId: string, values: string[]) => {
     setSelectedFilters(prev => ({
       ...prev,
       [groupId]: values
     }));
-    setPage(1); // Сбрасываем страницу при изменении фильтров
+    setPage(1);
   };
 
-  const { data: productsData, isLoading: isProductsLoading, error: productsError } = useProducts(
-    params.category,
-    search,
-    page,
-    sortField,
-    sortOrder,
-    selectedFilters
-  );
-
-  // Фильтруем товары, чтобы показывать только доступные (isAvailable: true)
-  const filteredProducts = productsData?.products.filter(product => product.isAvailable) || [];
+  if (productsError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">{t('errorOccurred')}</h2>
+          <p className="text-gray-600">{t('tryAgainLater')}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -184,7 +191,7 @@ export default function CategoryPage({ params }: { params: { category: string } 
                     value={search}
                     onChange={(value) => {
                       setSearch(value);
-                      setPage(1); // Сбрасываем страницу при поиске
+                      setPage(1);
                     }}
                     placeholder={t('searchProducts')}
                   />
@@ -194,7 +201,7 @@ export default function CategoryPage({ params }: { params: { category: string } 
                     value={sort}
                     onChange={(value) => {
                       setSort(value);
-                      setPage(1); // Сбрасываем страницу при изменении сортировки
+                      setPage(1);
                     }}
                     options={sortOptions}
                   />
@@ -210,35 +217,49 @@ export default function CategoryPage({ params }: { params: { category: string } 
 
           {/* Основной контент с товарами */}
           <div className="lg:col-span-3">
-            {/* Сетка товаров */}
             {isProductsLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredProducts.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      id={product.id}
-                      name={product.name}
-                      price={product.price}
-                      images={product.images}
-                      slug={product.slug}
-                    />
-                  ))}
+                {/* Отображение количества найденных товаров */}
+                <div className="mb-6">
+                  <p className="text-sm text-gray-600">
+                    {t('foundProducts', { count: productsData?.total || 0 })}
+                  </p>
                 </div>
 
-                {/* Пагинация */}
-                {productsData && productsData.totalPages > 1 && (
-                  <div className="mt-8">
-                    <Pagination
-                      currentPage={page}
-                      totalPages={productsData.totalPages}
-                      onPageChange={setPage}
-                    />
+                {productsData?.products.length === 0 ? (
+                  <div className="text-center py-12">
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">{t('noProductsFound')}</h3>
+                    <p className="text-gray-600">{t('tryDifferentFilters')}</p>
                   </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {productsData?.products.map((product) => (
+                        <ProductCard
+                          key={product.id}
+                          id={product.id}
+                          name={product.name}
+                          price={product.price}
+                          images={product.images}
+                          slug={product.slug}
+                        />
+                      ))}
+                    </div>
+
+                    {productsData && productsData.totalPages > 1 && (
+                      <div className="mt-8">
+                        <Pagination
+                          currentPage={page}
+                          totalPages={productsData.totalPages}
+                          onPageChange={setPage}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )}

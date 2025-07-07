@@ -2,13 +2,19 @@
 
 import { useState, useEffect } from 'react';
 
+interface AdvertisingPictures {
+  pictures: string[];
+}
+
 export default function SettingsPage() {
   const [telegramId, setTelegramId] = useState('');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const [advertisingPictures, setAdvertisingPictures] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState({
     telegram: false,
-    credentials: false
+    credentials: false,
+    advertising: false
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -19,22 +25,25 @@ export default function SettingsPage() {
 
   const fetchSettings = async () => {
     try {
-      const [telegramResponse, loginResponse] = await Promise.all([
+      const [telegramResponse, loginResponse, advertisingResponse] = await Promise.all([
         fetch('/api/admin/settings/telegram'),
-        fetch('/api/admin/settings/credentials')
+        fetch('/api/admin/settings/credentials'),
+        fetch('/api/admin/settings/advertising')
       ]);
 
-      if (!telegramResponse.ok || !loginResponse.ok) {
+      if (!telegramResponse.ok || !loginResponse.ok || !advertisingResponse.ok) {
         throw new Error('Ошибка при загрузке настроек');
       }
 
-      const [telegramId, login] = await Promise.all([
+      const [telegramId, login, advertising] = await Promise.all([
         telegramResponse.text(),
-        loginResponse.text()
+        loginResponse.text(),
+        advertisingResponse.json()
       ]);
 
       setTelegramId(telegramId || '');
       setLogin(login || '');
+      setAdvertisingPictures(advertising.pictures || []);
     } catch (error) {
       console.error('Error fetching settings:', error);
       setError('Ошибка при загрузке настроек');
@@ -120,6 +129,51 @@ export default function SettingsPage() {
     }
   };
 
+  const handleAdvertisingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    setIsLoading(prev => ({ ...prev, advertising: true }));
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await fetch('/api/admin/settings/advertising', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ pictures: advertisingPictures })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Ошибка при обновлении рекламных изображений');
+      }
+
+      setSuccess('Рекламные изображения успешно обновлены');
+    } catch (error) {
+      console.error('Error updating advertising pictures:', error);
+      setError(error instanceof Error ? error.message : 'Ошибка при обновлении рекламных изображений');
+    } finally {
+      setIsLoading(prev => ({ ...prev, advertising: false }));
+    }
+  };
+
+  const handlePictureChange = (index: number, value: string) => {
+    const newPictures = [...advertisingPictures];
+    newPictures[index] = value;
+    setAdvertisingPictures(newPictures);
+  };
+
+  const handleAddPicture = () => {
+    setAdvertisingPictures([...advertisingPictures, '']);
+  };
+
+  const handleRemovePicture = (index: number) => {
+    const newPictures = advertisingPictures.filter((_, i) => i !== index);
+    setAdvertisingPictures(newPictures);
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold text-white mb-6">Настройки</h1>
@@ -196,6 +250,46 @@ export default function SettingsPage() {
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
             {isLoading.credentials ? 'Сохранение...' : 'Сохранить учетные данные'}
+          </button>
+        </form>
+
+        <div className="border-t border-gray-800 my-6"></div>
+
+        <form onSubmit={handleAdvertisingSubmit} className="space-y-4">
+          <h2 className="text-xl font-semibold text-white">Рекламные изображения</h2>
+          <div className="space-y-4">
+            {advertisingPictures.map((picture, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="text"
+                  value={picture}
+                  onChange={(e) => handlePictureChange(index, e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemovePicture(index)}
+                  className="px-3 py-2 bg-red-600/20 text-red-500 rounded-lg hover:bg-red-600/30 transition-colors"
+                >
+                  Удалить
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={handleAddPicture}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              + Добавить изображение
+            </button>
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading.advertising}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          >
+            {isLoading.advertising ? 'Сохранение...' : 'Сохранить рекламные изображения'}
           </button>
         </form>
       </div>

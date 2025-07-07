@@ -9,6 +9,10 @@ type Language = 'ru' | 'ky';
 
 const LANGUAGE_COOKIE_NAME = 'preferred_language';
 
+interface TranslationParams {
+  [key: string]: string | number;
+}
+
 export const useLanguage = (initialLanguage: Language = 'ru') => {
   const [language, setLanguage] = useState<Language>(initialLanguage);
   const [isClient, setIsClient] = useState(false);
@@ -29,9 +33,17 @@ export const useLanguage = (initialLanguage: Language = 'ru') => {
     }
   };
 
-  const t = (key: TranslationKey): string => {
+  const t = (key: TranslationKey, params?: TranslationParams): string => {
     try {
-      return translations[language][key] || translations.ru[key] || key;
+      let text = translations[language][key] || translations.ru[key] || key;
+      
+      if (params) {
+        Object.entries(params).forEach(([param, value]) => {
+          text = text.replace(`{{${param}}}`, String(value));
+        });
+      }
+      
+      return text;
     } catch {
       return translations.ru[key] || key;
     }

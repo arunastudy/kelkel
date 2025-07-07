@@ -1,13 +1,30 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/app/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const category = await prisma.category.findUnique({
-      where: { id: params.id }
+    // Пытаемся найти категорию сначала по ID, затем по slug
+    let category = await prisma.category.findFirst({
+      where: {
+        OR: [
+          { id: params.id },
+          { slug: params.id }
+        ]
+      },
+      include: {
+        _count: {
+          select: {
+            products: {
+              where: {
+                isAvailable: true
+              }
+            }
+          }
+        }
+      }
     });
 
     if (!category) {
@@ -17,7 +34,16 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(category);
+    // Форматируем ответ
+    const response = {
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      description: category.description,
+      productsCount: category._count.products
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching category:', error);
     return NextResponse.json(

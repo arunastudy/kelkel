@@ -152,11 +152,12 @@ export const translations = {
 
     // Новые поля для поиска
     searchResults: 'Результаты поиска',
-    foundProducts: 'Найдено товаров: {{count}}',
+    foundProducts: 'Найдено: {{count}} товаров',
     noProductsFound: 'Товары не найдены',
     startSearching: 'Начните поиск',
     searchDescription: 'Введите название товара или его описание',
     tryAnotherSearch: 'Попробуйте изменить поисковый запрос',
+    tryDifferentFilters: 'Попробуйте изменить параметры фильтрации',
   },
   ky: {
     // Навигация
@@ -311,12 +312,12 @@ export const translations = {
 
     // Новые поля для поиска
     searchResults: 'Издөө жыйынтыктары',
-    foundProducts: 'Табылган товарлар: {{count}}',
+    foundProducts: 'Табылды: {{count}} товар',
     noProductsFound: 'Товарлар табылган жок',
     startSearching: 'Издөөнү баштаңыз',
     searchDescription: 'Товардын атын же сүрөттөмөсүн киргизиңиз',
-    noResults: 'Эч нерсе табылган жок',
     tryAnotherSearch: 'Издөө сөзүн өзгөртүп көрүңүз',
+    tryDifferentFilters: 'Чыпкалоо параметрлерин өзгөртүп көрүңүз',
 
     // Избранное
     noFavorites: 'Тандалгандарда азырынча эч нерсе жок',
