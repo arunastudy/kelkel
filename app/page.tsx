@@ -20,6 +20,7 @@ import { CalendarDateRangeIcon } from '@heroicons/react/24/solid';
 import { useLanguageContext } from './contexts/LanguageContext';
 import { LanguageToggle } from './components/LanguageToggle';
 import CategoriesBar from './components/CategoriesBar';
+import ImageCarousel from './components/ImageCarousel';
 
 interface FAQItem {
   question: string;
@@ -30,7 +31,25 @@ export default function Home() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [carouselImages, setCarouselImages] = useState<string[]>([]);
   const { t } = useLanguageContext();
+
+  // Загрузка изображений для карусели
+  useEffect(() => {
+    const fetchCarouselImages = async () => {
+      try {
+        const response = await fetch('/api/settings/advertising_pictures');
+        const data = await response.json();
+        if (data.value) {
+          setCarouselImages(JSON.parse(data.value));
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке изображений для карусели:', error);
+      }
+    };
+
+    fetchCarouselImages();
+  }, []);
 
   // Закрываем меню при изменении размера экрана
   useEffect(() => {
@@ -213,6 +232,9 @@ export default function Home() {
         <CategoriesBar />
       </div>
 
+      {/* Карусель изображений */}
+      <ImageCarousel images={carouselImages} />
+
       {/* Мобильное меню */}
       <div 
         className={`
@@ -272,25 +294,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Главный баннер */}
-      <div className="relative gradient-primary text-white py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-5"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-lg animate-fade-in">
-            {t('welcome')}
-          </h1>
-          <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto">
-            {t('shopDescription')}
-          </p>
-          <Link href="/catalog" className="inline-block bg-white text-primary font-semibold px-8 py-3 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 animate-bounce">
-            {t('startShopping')}
-          </Link>
-        </div>
-        {/* Декоративные элементы */}
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
       </div>
 
       {/* О нас */}
