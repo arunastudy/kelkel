@@ -271,69 +271,40 @@ export default function Home() {
             </div>
             
             <div className="w-full">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 relative">
+              <h2 className="text-4xl font-bold text-center mb-16">
                 {t('ourAdvantages')}
-                <div className="absolute w-24 h-1 gradient-primary bottom-0 left-1/2 transform -translate-x-1/2 mt-4"></div>
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="relative group">
-                  <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="relative p-8 text-white">
-                    <div className="flex flex-col items-center text-center space-y-4">
-                      <div className="bg-white/20 rounded-xl p-3 backdrop-blur-sm">
-                        <TruckIcon className="h-8 w-8" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">{t('fastDelivery')}</h3>
-                        <p className="text-white/90">{t('fastDeliveryDesc')}</p>
-                      </div>
-                    </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="flex flex-col items-center text-center transform transition-all duration-300 hover:scale-105 p-6 rounded-lg shadow-md hover:shadow-lg">
+                  <div className="bg-primary rounded-full p-4 mb-6">
+                    <TruckIcon className="h-8 w-8 text-white" />
                   </div>
+                  <h3 className="text-xl font-semibold mb-3 text-gray-800">{t('fastDelivery')}</h3>
+                  <p className="text-gray-600">{t('fastDeliveryDesc')}</p>
                 </div>
 
-                <div className="relative group">
-                  <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="relative p-8 text-white">
-                    <div className="flex flex-col items-center text-center space-y-4">
-                      <div className="bg-white/20 rounded-xl p-3 backdrop-blur-sm">
-                        <ShieldCheckIcon className="h-8 w-8" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">{t('qualityGuarantee')}</h3>
-                        <p className="text-white/90">{t('qualityGuaranteeDesc')}</p>
-                      </div>
-                    </div>
+                <div className="flex flex-col items-center text-center transform transition-all duration-300 hover:scale-105 p-6 rounded-lg shadow-md hover:shadow-lg">
+                  <div className="bg-primary rounded-full p-4 mb-6">
+                    <ShieldCheckIcon className="h-8 w-8 text-white" />
                   </div>
+                  <h3 className="text-xl font-semibold mb-3 text-gray-800">{t('qualityGuarantee')}</h3>
+                  <p className="text-gray-600">{t('qualityGuaranteeDesc')}</p>
                 </div>
 
-                <div className="relative group">
-                  <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="relative p-8 text-white">
-                    <div className="flex flex-col items-center text-center space-y-4">
-                      <div className="bg-white/20 rounded-xl p-3 backdrop-blur-sm">
-                        <CubeIcon className="h-8 w-8" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">{t('wideRange')}</h3>
-                        <p className="text-white/90">{t('wideRangeDesc')}</p>
-                      </div>
-                    </div>
+                <div className="flex flex-col items-center text-center transform transition-all duration-300 hover:scale-105 p-6 rounded-lg shadow-md hover:shadow-lg">
+                  <div className="bg-primary rounded-full p-4 mb-6">
+                    <CubeIcon className="h-8 w-8 text-white" />
                   </div>
+                  <h3 className="text-xl font-semibold mb-3 text-gray-800">{t('wideRange')}</h3>
+                  <p className="text-gray-600">{t('wideRangeDesc')}</p>
                 </div>
 
-                <div className="relative group">
-                  <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="relative p-8 text-white">
-                    <div className="flex flex-col items-center text-center space-y-4">
-                      <div className="bg-white/20 rounded-xl p-3 backdrop-blur-sm">
-                        <HeartIcon className="h-8 w-8" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">{t('affordablePrices')}</h3>
-                        <p className="text-white/90">{t('affordablePricesDesc')}</p>
-                      </div>
-                    </div>
+                <div className="flex flex-col items-center text-center transform transition-all duration-300 hover:scale-105 p-6 rounded-lg shadow-md hover:shadow-lg">
+                  <div className="bg-primary rounded-full p-4 mb-6">
+                    <HeartIcon className="h-8 w-8 text-white" />
                   </div>
+                  <h3 className="text-xl font-semibold mb-3 text-gray-800">{t('affordablePrices')}</h3>
+                  <p className="text-gray-600">{t('affordablePricesDesc')}</p>
                 </div>
               </div>
             </div>
@@ -342,56 +313,39 @@ export default function Home() {
       </section>
 
       {/* Как купить */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 relative">
+          <h2 className="text-4xl font-bold text-center mb-16">
             {t('howToBuy')}
-            <div className="absolute w-24 h-1 gradient-primary bottom-0 left-1/2 transform -translate-x-1/2 mt-4"></div>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="relative group">
-              <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative p-8 text-white">
-                <div className="flex items-start space-x-4">
-                  <div className="bg-white/20 rounded-xl p-3 backdrop-blur-sm">
-                    <ShoppingBagIcon className="h-8 w-8" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold mb-2">01</div>
-                    <h3 className="text-xl font-semibold mb-3">{t('step1')}</h3>
-                    <p className="text-white/90">{t('step1Desc')}</p>
-                  </div>
+            <div className="bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 group hover:bg-primary">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="text-primary group-hover:text-white mb-4">
+                  <ShoppingBagIcon className="h-16 w-16" />
                 </div>
+                <h3 className="text-xl font-semibold text-gray-800 group-hover:text-white">{t('step1')}</h3>
+                <p className="text-gray-600 group-hover:text-white/90">{t('step1Desc')}</p>
               </div>
             </div>
-            <div className="relative group">
-              <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative p-8 text-white">
-                <div className="flex items-start space-x-4">
-                  <div className="bg-white/20 rounded-xl p-3 backdrop-blur-sm">
-                    <ClipboardDocumentIcon className="h-8 w-8" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold mb-2">02</div>
-                    <h3 className="text-xl font-semibold mb-3">{t('step2')}</h3>
-                    <p className="text-white/90">{t('step2Desc')}</p>
-                  </div>
+
+            <div className="bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 group hover:bg-primary">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="text-primary group-hover:text-white mb-4">
+                  <ClipboardDocumentIcon className="h-16 w-16" />
                 </div>
+                <h3 className="text-xl font-semibold text-gray-800 group-hover:text-white">{t('step2')}</h3>
+                <p className="text-gray-600 group-hover:text-white/90">{t('step2Desc')}</p>
               </div>
             </div>
-            <div className="relative group">
-              <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative p-8 text-white">
-                <div className="flex items-start space-x-4">
-                  <div className="bg-white/20 rounded-xl p-3 backdrop-blur-sm">
-                    <TruckIcon className="h-8 w-8" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold mb-2">03</div>
-                    <h3 className="text-xl font-semibold mb-3">{t('step3')}</h3>
-                    <p className="text-white/90">{t('step3Desc')}</p>
-                  </div>
+
+            <div className="bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 group hover:bg-primary">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="text-primary group-hover:text-white mb-4">
+                  <TruckIcon className="h-16 w-16" />
                 </div>
+                <h3 className="text-xl font-semibold text-gray-800 group-hover:text-white">{t('step3')}</h3>
+                <p className="text-gray-600 group-hover:text-white/90">{t('step3Desc')}</p>
               </div>
             </div>
           </div>
@@ -401,16 +355,19 @@ export default function Home() {
       {/* Отзывы клиентов */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 relative">
-            {t('customerReviews')}
-            <div className="absolute w-24 h-1 gradient-primary bottom-0 left-1/2 transform -translate-x-1/2 mt-4"></div>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
+            {t('customerReviews')}!!!
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="relative group">
-              <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative p-8 text-white">
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden ring-4 ring-white/30">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-8 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
+              <div className="mb-6">
+                <div className="text-6xl text-primary opacity-20">"</div>
+                <p className="text-gray-700 mb-6">
+                  {t('review1')}
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="relative w-16 h-16 rounded-full overflow-hidden mr-4">
                     <Image
                       src="https://randomuser.me/api/portraits/women/83.jpg"
                       alt="Айжан Б."
@@ -419,21 +376,21 @@ export default function Home() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Айжан Бекмырзаева</h3>
-                    <p className="text-white/80">{t('regularCustomer')}</p>
-                  </div>
-                </div>
-                <p className="text-white/90 italic mb-4">{t('review1')}</p>
-                <div className="flex text-yellow-300">
-                  {'★'.repeat(5)}
+                  <h3 className="font-bold text-lg">Айжан Тазабекова</h3>
+                  <p className="text-gray-600">Программист</p>
                 </div>
               </div>
             </div>
-            <div className="relative group">
-              <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative p-8 text-white">
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden ring-4 ring-white/30">
+
+            <div className="bg-primary text-white p-8 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
+              <div className="mb-6">
+                <div className="text-6xl opacity-20">"</div>
+                <p className="mb-6">
+                  {t('review2')}
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="relative w-16 h-16 rounded-full overflow-hidden mr-4">
                     <Image
                       src="https://randomuser.me/api/portraits/men/6.jpg"
                       alt="Эрлан С."
@@ -442,36 +399,31 @@ export default function Home() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Эрлан Садыков</h3>
-                    <p className="text-white/80">{t('newCustomer')}</p>
-                  </div>
-                </div>
-                <p className="text-white/90 italic mb-4">{t('review2')}</p>
-                <div className="flex text-yellow-300">
-                  {'★'.repeat(5)}
+                  <h3 className="font-bold text-lg">Абазов Эрлан</h3>
+                  <p className="text-white/80">Бизнесмен</p>
                 </div>
               </div>
             </div>
-            <div className="relative group">
-              <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative p-8 text-white">
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden ring-4 ring-white/30">
+
+            <div className="bg-white p-8 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
+              <div className="mb-6">
+                <div className="text-6xl text-primary opacity-20">"</div>
+                <p className="text-gray-700 mb-6">
+                  {t('review3')}
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="relative w-16 h-16 rounded-full overflow-hidden mr-4">
                     <Image
                       src="https://randomuser.me/api/portraits/women/40.jpg"
-                      alt="Гулзат Т."
+                    alt="Куба А."
                       fill
                       className="object-cover"
                     />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Гулзат Турусбекова</h3>
-                    <p className="text-white/80">{t('regularCustomer')}</p>
-                  </div>
-                </div>
-                <p className="text-white/90 italic mb-4">{t('review3')}</p>
-                <div className="flex text-yellow-300">
-                  {'★'.repeat(5)}
+                  <h3 className="font-bold text-lg">Куба Асанов</h3>
+                  <p className="text-gray-600">Юрист</p>
                 </div>
               </div>
             </div>
@@ -482,32 +434,48 @@ export default function Home() {
       {/* Частые вопросы */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 relative">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             {t('faq')}
-            <div className="absolute w-24 h-1 gradient-primary bottom-0 left-1/2 transform -translate-x-1/2 mt-4"></div>
           </h2>
-          <div className="space-y-4 max-w-3xl mx-auto">
+          <p className="text-gray-600 text-center mb-16 max-w-2xl mx-auto">
+            {t('faqDescription')}
+          </p>
+          <div className="max-w-3xl mx-auto space-y-6">
             {faqs.map((faq, index) => (
-              <div key={index} className="relative group">
-                <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative overflow-hidden rounded-2xl">
+              <div 
+                key={index} 
+                className={`bg-white rounded-xl shadow-sm transition-all duration-300 hover:shadow-lg border-l-4 ${
+                  openFAQ === index ? 'border-l-primary' : 'border-l-transparent'
+                }`}
+              >
                   <button
-                    className="w-full px-6 py-4 text-left flex justify-between items-center text-white"
+                  className="w-full px-8 py-6 text-left flex justify-between items-center gap-4"
                     onClick={() => toggleFAQ(index)}
                   >
-                    <span className="text-lg font-semibold">{faq.question}</span>
+                  <span className={`text-lg font-medium transition-colors duration-300 ${
+                    openFAQ === index ? 'text-primary' : 'text-gray-900'
+                  }`}>
+                    {faq.question}
+                  </span>
+                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    openFAQ === index ? 'bg-primary rotate-180' : 'bg-gray-100'
+                  }`}>
                     <ChevronDownIcon
-                      className={`w-5 h-5 transition-transform duration-300 ${
-                        openFAQ === index ? 'transform rotate-180' : ''
+                      className={`w-5 h-5 transition-colors duration-300 ${
+                        openFAQ === index ? 'text-white' : 'text-gray-500'
                       }`}
                     />
+                  </div>
                   </button>
                   <div
-                    className={`px-6 overflow-hidden transition-all duration-300 ${
-                      openFAQ === index ? 'max-h-40 py-4' : 'max-h-0'
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    openFAQ === index ? 'max-h-96' : 'max-h-0'
                     }`}
                   >
-                    <p className="text-white/90">{faq.answer}</p>
+                  <div className="px-8 pb-6">
+                    <p className="text-gray-600 leading-relaxed">
+                      {faq.answer}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -517,22 +485,19 @@ export default function Home() {
       </section>
 
       {/* Футер */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-gray-800 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             {/* Первая колонка - О нас */}
             <div>
               <div className="flex items-center space-x-2 mb-6">
                 <Image
-                  src="/images/logo.svg"
+                  src="/logo-small.svg"
                   alt="КЕЛКЕЛ"
                   width={40}
                   height={40}
-                  className="w-auto h-8"
+                  className="w-auto h-14"
                 />
-                <span className="text-2xl font-bold gradient-text">
-                  КЕЛКЕЛ
-                </span>
               </div>
               <p className="text-gray-400">{t('storeDescription')}</p>
             </div>

@@ -8,10 +8,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#2563eb",
-        secondary: "#1e40af",
+        primary: "#f85125",
+        secondary: "#FCA45B",
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms')({
+      strategy: 'class',
+    }),
+  ],
 } 

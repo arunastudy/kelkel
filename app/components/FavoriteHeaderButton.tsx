@@ -40,11 +40,11 @@ export default function FavoriteHeaderButton({ showText = false }: FavoriteHeade
   }, []);
 
   return (
-    <Link href="/favorites" className="relative flex items-center space-x-1 transition-colors hover:text-primary">
-      <div className="relative p-1">
+    <Link href="/favorites" className="relative flex items-center space-x-1 transition-colors hover:text-[#f85125]">
+      <div className="relative">
         <HeartIcon className="h-5 w-5 sm:h-6 sm:w-6" />
         {itemsCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-primary text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+          <span className="absolute -top-2 -right-2 bg-[#f85125] text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
             {itemsCount}
           </span>
         )}

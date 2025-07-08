@@ -6,13 +6,13 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
-  --primary: #34a7ba;
+  --primary: #f85125;
   --primary-dark: #2a8695;
-  --secondary: #4ac29a;
+  --secondary: #FCA45B;
   --secondary-dark: #3da882;
-  --gradient-start: #34a7ba;
-  --gradient-middle: #3ab4a6;
-  --gradient-end: #4ac29a;
+  --gradient-start: #f85125;
+  --gradient-middle: #FCA45B;
+  --gradient-end: #f85125;
 }
 
 body {
@@ -23,6 +23,10 @@ body {
 @layer base {
   body {
     @apply antialiased;
+  }
+
+  input:focus {
+    @apply outline-none ring-2 ring-[#f85125] border-[#f85125] transition-colors duration-200;
   }
 }
 

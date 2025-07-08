@@ -101,11 +101,11 @@ export default function Header() {
             {/* Логотип */}
             <Link href="/" className="flex-shrink-0" onClick={closeMobileMenu}>
               <Image
-                src="/images/logo.svg"
+                src="/logo-small.svg"
                 alt="АПАКАЙ"
-                width={40}
-                height={40}
-                className="w-auto h-6 sm:h-8"
+                width={100}
+                height={100}
+                className="w-auto h-[15px] sm:h-[35px]"
               />
             </Link>
 
@@ -123,26 +123,28 @@ export default function Header() {
 
               {/* Навигация */}
               <div className="flex items-center space-x-1 sm:space-x-6">
-                <LanguageToggle />
+                <div className="rounded-lg hover:bg-[#f85125]/10 transition-colors h-10 flex items-center">
+                  <LanguageToggle />
+                </div>
                 
                 {/* Каталог - скрыть на мобильных */}
                 <Link 
                   href="/catalog" 
-                  className="hidden sm:flex items-center space-x-1 transition-colors hover:text-primary"
+                  className="hidden sm:flex items-center space-x-1 transition-colors hover:text-[#f85125] rounded-lg hover:bg-[#f85125]/10 h-10 px-1.5"
                 >
                   <ShoppingBagIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                   <span className="text-sm font-medium">{t('catalog')}</span>
                 </Link>
 
                 {/* Избранное - скрыть на мобильных */}
-                <div className="hidden sm:flex items-center">
+                <div className="hidden sm:flex items-center rounded-lg hover:bg-[#f85125]/10 transition-colors h-10 px-1.5">
                   <FavoriteHeaderButton showText={true} />
                 </div>
 
                 {/* Корзина - показывать всегда */}
                 <Link 
                   href="/cart" 
-                  className="flex items-center space-x-1 transition-colors hover:text-primary p-1 sm:p-0"
+                  className="flex items-center space-x-1 transition-colors hover:text-[#f85125] rounded-lg hover:bg-[#f85125]/10 h-10 px-1.5"
                 >
                   <ShoppingCartIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                   <span className="hidden sm:inline text-sm font-medium">{t('cart')}</span>

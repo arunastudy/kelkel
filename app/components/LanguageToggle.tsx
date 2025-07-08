@@ -32,14 +32,14 @@ export function LanguageToggle() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+        className="flex items-center space-x-2 p-1.5 rounded-lg transition-colors group"
         aria-expanded={isOpen}
       >
-        <LanguageIcon className="h-5 w-5 text-gray-600" />
-        <span className="font-medium text-gray-700">
+        <LanguageIcon className="h-5 w-5 text-gray-600 group-hover:text-[#f85125] transition-colors" />
+        <span className="font-medium text-gray-700 group-hover:text-[#f85125] transition-colors">
           {language === 'ru' ? 'RU' : 'KG'}
         </span>
-        <ChevronDownIcon className={`h-4 w-4 text-gray-600 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDownIcon className={`h-4 w-4 text-gray-600 group-hover:text-[#f85125] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown menu */}

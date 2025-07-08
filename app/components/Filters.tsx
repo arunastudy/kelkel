@@ -37,11 +37,11 @@ export default function Filters({ groups, selectedFilters, onChange }: FiltersPr
                       : currentValues.filter((v) => v !== option.value);
                     onChange(group.id, newValues);
                   }}
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  className="form-checkbox h-4 w-4 rounded border-gray-300 text-[#f85125] focus:ring-0 cursor-pointer checked:bg-[#f85125] checked:hover:bg-[#f85125] hover:bg-[#f85125]/10 transition-colors"
                 />
                 <label
                   htmlFor={`${group.id}-${option.value}`}
-                  className="ml-3 text-sm text-gray-600"
+                  className="ml-3 text-sm text-gray-600 cursor-pointer"
                 >
                   {option.label}
                 </label>
