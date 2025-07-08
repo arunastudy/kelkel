@@ -253,7 +253,7 @@ export const translations = {
     selectCategory: 'Категорияны тандап, керектүү нерсени табыңыз',
     products: 'товар',
     view: 'көрүү',
-    addToCart: 'Себетке кошуу',
+    addToCart: 'Себетке',
     outOfStock: 'Жок',
     quantity: 'Саны',
     price: 'Баасы',
