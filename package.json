@@ -25,6 +25,7 @@
     "jose": "^6.0.10",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
+    "libphonenumber-js": "^1.12.9",
     "next": "^14.1.0",
     "node-telegram-bot-api": "^0.66.0",
     "pg": "^8.14.0",

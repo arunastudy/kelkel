@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { useLanguageContext } from '@/app/contexts/LanguageContext';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
+import { parsePhoneNumber, isValidPhoneNumber, CountryCode } from 'libphonenumber-js';
 
 interface OrderFormProps {
   cartItems: Array<{
@@ -19,16 +20,57 @@ interface OrderFormProps {
   onClose: () => void;
 }
 
+// Список популярных стран с их кодами
+const popularCountries = [
+  { code: 'KG', name: 'Кыргызстан', dialCode: '+996' },
+  { code: 'RU', name: 'Россия', dialCode: '+7' },
+  { code: 'KZ', name: 'Казахстан', dialCode: '+7' },
+  { code: 'UZ', name: 'Узбекистан', dialCode: '+998' },
+  { code: 'TJ', name: 'Таджикистан', dialCode: '+992' },
+];
+
 export default function OrderForm({ cartItems, totalSum, onClose }: OrderFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     contactType: 'whatsapp',
-    phone: ''
+    phone: '',
+    countryCode: 'KG' as CountryCode
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const { t, language } = useLanguageContext();
   const router = useRouter();
+
+  // Валидация телефонного номера
+  const validatePhoneNumber = (phoneNumber: string, countryCode: CountryCode) => {
+    try {
+      if (!phoneNumber) {
+        setPhoneError(t('phoneRequired'));
+        return false;
+      }
+
+      // Добавляем код страны, если его нет
+      const fullNumber = phoneNumber.startsWith('+') ? phoneNumber : `${popularCountries.find(c => c.code === countryCode)?.dialCode}${phoneNumber}`;
+      
+      if (!isValidPhoneNumber(fullNumber, countryCode)) {
+        setPhoneError(t('invalidPhone'));
+        return false;
+      }
+
+      const parsedNumber = parsePhoneNumber(fullNumber, countryCode);
+      if (!parsedNumber?.isValid()) {
+        setPhoneError(t('invalidPhone'));
+        return false;
+      }
+
+      setPhoneError('');
+      return parsedNumber.format('E.164'); // Возвращаем номер в международном формате
+    } catch (error) {
+      setPhoneError(t('invalidPhone'));
+      return false;
+    }
+  };
 
   const sendToTelegram = async (orderData: any) => {
     try {
@@ -39,7 +81,7 @@ export default function OrderForm({ cartItems, totalSum, onClose }: OrderFormPro
         },
         body: JSON.stringify({
           ...orderData,
-          language // Добавляем язык интерфейса
+          language
         }),
       });
 
@@ -61,34 +103,33 @@ export default function OrderForm({ cartItems, totalSum, onClose }: OrderFormPro
     setIsSubmitting(true);
     setError('');
 
+    // Валидация телефона перед отправкой
+    const validatedPhone = validatePhoneNumber(formData.phone, formData.countryCode);
+    if (!validatedPhone) {
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // Подготавливаем данные о товарах
-      const items = cartItems.map(item => {
-        return {
-          name: item.product.name,
-          quantity: item.quantity,
-          price: item.product.price,
-          id: item.product.id
-        };
-      });
+      const items = cartItems.map(item => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price,
+        id: item.product.id
+      }));
 
-
-
-      // Отправляем заказ
       await sendToTelegram({
         name: formData.name.trim(),
-        phone: formData.phone.trim(),
+        phone: validatedPhone,
         contactType: formData.contactType,
         items,
         totalSum
       });
 
-      // Очищаем корзину
       Cookies.remove('cart');
       localStorage.removeItem('cartPrices');
       localStorage.removeItem('productDetails');
 
-      // Вызываем событие обновления корзины
       window.dispatchEvent(new CustomEvent('cartUpdate', {
         detail: {
           cartData: {},
@@ -96,7 +137,6 @@ export default function OrderForm({ cartItems, totalSum, onClose }: OrderFormPro
       }));
 
       onClose();
-      // Перенаправляем на страницу корзины и перезагружаем её
       router.push('/cart');
       window.location.reload();
     } catch (err) {
@@ -110,14 +150,17 @@ export default function OrderForm({ cartItems, totalSum, onClose }: OrderFormPro
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+
+    // Очищаем ошибку телефона при изменении номера или страны
+    if (name === 'phone' || name === 'countryCode') {
+      setPhoneError('');
+    }
   };
 
   return (
     <div className="fixed inset-0 z-[100] overflow-y-auto">
-      {/* Затемнение фона */}
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
 
-      {/* Модальное окно */}
       <div className="relative min-h-screen flex items-center justify-center p-4">
         <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl">
           <div className="p-6">
@@ -193,16 +236,33 @@ export default function OrderForm({ cartItems, totalSum, onClose }: OrderFormPro
                 <label htmlFor="phone" className="block text-sm font-semibold text-gray-700">
                   {t('phone')}
                 </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  required
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm focus:border-primary focus:ring-primary transition-all duration-300"
-                  placeholder={t('enterPhone')}
-                />
+                <div className="flex gap-2">
+                  <select
+                    name="countryCode"
+                    value={formData.countryCode}
+                    onChange={handleChange}
+                    className="rounded-xl border border-gray-200 bg-white px-3 py-3 shadow-sm focus:border-primary focus:ring-primary transition-all duration-300"
+                  >
+                    {popularCountries.map(country => (
+                      <option key={country.code} value={country.code}>
+                        {country.dialCode}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm focus:border-primary focus:ring-primary transition-all duration-300"
+                    placeholder={t('enterPhone')}
+                  />
+                </div>
+                {phoneError && (
+                  <p className="text-sm text-red-500 mt-1">{phoneError}</p>
+                )}
               </div>
 
               {error && (
