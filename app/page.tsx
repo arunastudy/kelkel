@@ -65,6 +65,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState(0); // 0 - Каракол (по умолчанию)
   const { t } = useLanguageContext();
 
   // Загрузка изображений для карусели
@@ -480,6 +481,104 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Карта */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
+            {t('ourLocation')}
+          </h2>
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Карта */}
+            <div className="lg:w-2/3">
+              <div className="w-full h-[400px] rounded-xl overflow-hidden shadow-lg">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1461.7818774622828!2d78.38235537970658!3d42.49255797971274!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDLCsDI5JzMyLjEiTiA3OMKwMjInNTkuNCJF!5e0!3m2!1sru!2skg!4v1709825659387!5m2!1sru!2skg&markers=color:red%7C42.492558,78.38317"
+                  width="100%"
+                  height="400"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Карта расположения магазина КЕЛКЕЛ"
+                  className="w-full h-full"
+                ></iframe>
+              </div>
+            </div>
+
+            {/* Выбор точек */}
+            <div className="lg:w-1/3 space-y-4">
+              <button 
+                className={`w-full p-4 text-left rounded-lg border transition-colors group
+                  ${selectedLocation === 0 
+                    ? 'border-[#f85125] bg-[#f85125]/10' 
+                    : 'border-gray-200 hover:border-[#f85125] hover:bg-[#f85125]/10'}`}
+                onClick={() => {
+                  setSelectedLocation(0);
+                  const iframe = document.querySelector('iframe');
+                  if (iframe) {
+                    iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1461.7818774622828!2d78.38235537970658!3d42.49255797971274!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDLCsDI5JzMyLjEiTiA3OMKwMjInNTkuNCJF!5e0!3m2!1sru!2skg!4v1709825659387!5m2!1sru!2skg&markers=color:red%7C42.492558,78.38317`;
+                  }
+                }}
+              >
+                <h3 className={`font-medium ${selectedLocation === 0 ? 'text-[#f85125]' : 'text-gray-900 group-hover:text-[#f85125]'}`}>г. Каракол</h3>
+                <p className="text-gray-600">ул. Торгоева 42</p>
+              </button>
+
+              <button 
+                className={`w-full p-4 text-left rounded-lg border transition-colors group
+                  ${selectedLocation === 1 
+                    ? 'border-[#f85125] bg-[#f85125]/10' 
+                    : 'border-gray-200 hover:border-[#f85125] hover:bg-[#f85125]/10'}`}
+                onClick={() => {
+                  setSelectedLocation(1);
+                  const iframe = document.querySelector('iframe');
+                  if (iframe) {
+                    iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2923.5637549245657!2d74.613041!3d42.849555!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDLCsDUwJzU4LjQiTiA3NMKwMzYnNDcuMCJF!5e0!3m2!1sru!2skg!4v1709825659387!5m2!1sru!2skg&markers=color:red%7C42.849555,74.613041`;
+                  }
+                }}
+              >
+                <h3 className={`font-medium ${selectedLocation === 1 ? 'text-[#f85125]' : 'text-gray-900 group-hover:text-[#f85125]'}`}>г. Бишкек</h3>
+                <p className="text-gray-600">ул. Скрябина, 78к</p>
+              </button>
+
+              <button 
+                className={`w-full p-4 text-left rounded-lg border transition-colors group
+                  ${selectedLocation === 2 
+                    ? 'border-[#f85125] bg-[#f85125]/10' 
+                    : 'border-gray-200 hover:border-[#f85125] hover:bg-[#f85125]/10'}`}
+                onClick={() => {
+                  setSelectedLocation(2);
+                  const iframe = document.querySelector('iframe');
+                  if (iframe) {
+                    iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2923.5637549245657!2d74.58279!3d42.879261!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDLCsDUyJzQ1LjMiTiA3NMKwMzQnNTguMCJF!5e0!3m2!1sru!2skg!4v1709825659387!5m2!1sru!2skg&markers=color:red%7C42.879261,74.58279`;
+                  }
+                }}
+              >
+                <h3 className={`font-medium ${selectedLocation === 2 ? 'text-[#f85125]' : 'text-gray-900 group-hover:text-[#f85125]'}`}>г. Бишкек</h3>
+                <p className="text-gray-600">ул. Рыскулова, 30</p>
+              </button>
+
+              <button 
+                className={`w-full p-4 text-left rounded-lg border transition-colors group
+                  ${selectedLocation === 3 
+                    ? 'border-[#f85125] bg-[#f85125]/10' 
+                    : 'border-gray-200 hover:border-[#f85125] hover:bg-[#f85125]/10'}`}
+                onClick={() => {
+                  setSelectedLocation(3);
+                  const iframe = document.querySelector('iframe');
+                  if (iframe) {
+                    iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2923.5637549245657!2d74.512684!3d42.844502!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDLCsDUwJzQwLjIiTiA3NMKwMzAnNDUuNyJF!5e0!3m2!1sru!2skg!4v1709825659387!5m2!1sru!2skg&markers=color:red%7C42.844502,74.512684`;
+                  }
+                }}
+              >
+                <h3 className={`font-medium ${selectedLocation === 3 ? 'text-[#f85125]' : 'text-gray-900 group-hover:text-[#f85125]'}`}>г. Бишкек</h3>
+                <p className="text-gray-600">ул. Таш-Рабат, 70/1</p>
+              </button>
+            </div>
           </div>
         </div>
       </section>
