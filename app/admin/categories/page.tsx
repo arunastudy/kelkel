@@ -37,7 +37,7 @@ export default function CategoriesPage() {
     sortBy: 'name',
     sortOrder: 'asc',
     page: 1,
-    perPage: 10
+    perPage: 50
   });
   const [totalCategories, setTotalCategories] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -234,7 +234,7 @@ export default function CategoriesPage() {
           <div className="text-red-500 mb-4">{error}</div>
           <button
             onClick={fetchCategories}
-            className="px-4 py-2 bg-primary hover:bg-primary/90 rounded-lg transition-colors"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
             Попробовать снова
           </button>
@@ -247,36 +247,37 @@ export default function CategoriesPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-950 text-white p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400">Категории</h1>
-          <button
-            onClick={handleCreateCategory}
-            className="flex items-center px-5 py-2.5 bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-600 rounded-lg transition-all duration-300 shadow-lg shadow-primary/20"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Добавить категорию
-          </button>
+          <h1 className="text-3xl font-bold text-white">Категории</h1>
+          <div className="flex gap-4">
+            <button
+              onClick={handleCreateCategory}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <PlusIcon className="h-5 w-5 mr-2" />
+              Добавить категорию
+            </button>
+          </div>
         </div>
 
         {/* Панель фильтров */}
         <div className="bg-gray-800/80 backdrop-blur-sm p-5 rounded-xl mb-6 shadow-xl shadow-black/20 border border-gray-700/50">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
-              <div className="relative flex">
+              <div className="relative">
                 <input
+                  ref={searchInputRef}
                   type="text"
-                  placeholder="Поиск категорий..."
+                  placeholder="Поиск по названию..."
                   value={searchValue}
                   onChange={(e) => handleSearch(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
-                  ref={searchInputRef}
-                  className="w-full pl-4 pr-10 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-l-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/70 transition-all duration-300"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
                 />
                 <button
                   onClick={applySearch}
-                  className="px-4 py-2.5 bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-600 rounded-r-lg transition-all duration-300 flex items-center"
+                  className="absolute right-0 top-0 h-full px-4 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors"
                 >
-                  <span className="mr-2">Найти</span>
-                  <MagnifyingGlassIcon className="h-5 w-5 text-white" />
+                  <MagnifyingGlassIcon className="h-5 w-5" />
                 </button>
               </div>
             </div>
@@ -337,7 +338,11 @@ export default function CategoriesPage() {
                 </tr>
               ) : categories && categories.length > 0 ? (
                 categories.map((category) => (
-                  <tr key={category.id} className="hover:bg-primary/5 cursor-pointer transition-colors duration-200" onClick={() => handleEditCategory(category)}>
+                  <tr
+                    key={category.id}
+                    onClick={() => handleEditCategory(category)}
+                    className="cursor-pointer hover:bg-blue-500/10 transition-colors"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap font-medium">{category.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -349,7 +354,7 @@ export default function CategoriesPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button 
-                        className="text-gray-400 hover:text-primary p-2 transition-colors duration-200"
+                        className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleEditCategory(category);
@@ -358,7 +363,7 @@ export default function CategoriesPage() {
                         <PencilIcon className="h-5 w-5" />
                       </button>
                       <button 
-                        className="text-gray-400 hover:text-red-500 p-2 transition-colors duration-200"
+                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteCategory(category.id);

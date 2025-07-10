@@ -5,7 +5,7 @@ import { uploadImage } from '@/app/utils/cloudinary';
 
 const prisma = new PrismaClient();
 
-export const DEFAULT_PRODUCT_IMAGE = '/images/product-default.jpg';
+export const DEFAULT_PRODUCT_IMAGE = '/images/product-default.png';
 
 // GET /api/admin/products
 export async function GET(request: NextRequest) {

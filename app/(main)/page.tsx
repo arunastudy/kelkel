@@ -528,7 +528,7 @@ export default function Home() {
               <div className="flex items-center space-x-2 mb-6">
                 <Image
                   src="/images/logo.svg"
-                  alt="APAKAI"
+                  alt="KELKEL"
                   width={40}
                   height={40}
                   className="w-auto h-8"

@@ -105,7 +105,7 @@ export default function ProductsPage() {
     sortBy: 'name',
     sortOrder: 'asc',
     page: 1,
-    perPage: 10
+    perPage: 100
   });
   const [totalProducts, setTotalProducts] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -267,7 +267,7 @@ export default function ProductsPage() {
         // Обновляем UI, чтобы показать пользователю, что будет использовано изображение по умолчанию
         const defaultImage: ProductImage = {
           id: 'default-temp',
-          url: '/images/product-default.jpg'
+          url: '/images/product-default.png'
         };
         
         setEditingProduct({
@@ -491,21 +491,19 @@ export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-950 text-white p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400">
-            Товары
-          </h1>
-          <div className="flex items-center space-x-4">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-white">Товары</h1>
+          <div className="flex gap-4">
             <button
               onClick={() => setShowImportExport(true)}
-              className="flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-all duration-300 shadow-lg shadow-blue-500/20"
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
               Импорт/Экспорт
             </button>
             <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center px-5 py-2.5 bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-600 rounded-lg transition-all duration-300 shadow-lg shadow-primary/20"
+              onClick={handleAddProduct}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <PlusIcon className="h-5 w-5 mr-2" />
               Добавить товар
@@ -513,74 +511,62 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        {/* Панель фильтров */}
-        <div className="bg-gray-800/80 backdrop-blur-sm p-5 rounded-xl mb-6 shadow-xl shadow-black/20 border border-gray-700/50">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Поиск */}
-            <div>
-              <div className="relative flex">
-                <input
-                  type="text"
-                  placeholder="Поиск товаров..."
-                  value={searchValue}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  onKeyDown={handleSearchKeyDown}
-                  ref={searchInputRef}
-                  className="w-full pl-4 pr-10 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-l-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/70 transition-all duration-300"
-                />
-                <button
-                  onClick={applySearch}
-                  className="px-4 py-2.5 bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-600 rounded-r-lg transition-all duration-300 flex items-center"
-                >
-                  <span className="mr-2">Найти</span>
-                  <MagnifyingGlassIcon className="h-5 w-5 text-white" />
-                </button>
-              </div>
-            </div>
+        {/* Поисковая строка */}
+        <div className="relative mb-4">
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Поиск по названию..."
+            value={searchValue}
+            onChange={(e) => handleSearch(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+          />
+          <button
+            onClick={applySearch}
+            className="absolute right-0 top-0 h-full px-4 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors"
+          >
+            <MagnifyingGlassIcon className="h-5 w-5" />
+          </button>
+        </div>
 
-            {/* Фильтр по категории */}
-            <div>
-              <select
-                value={filters.categoryId}
-                onChange={(e) => handleCategoryFilter(e.target.value)}
-                className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/70 transition-all duration-300 appearance-none cursor-pointer bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTQgNmw0IDQgNC00IiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-right-4 bg-center-y max-h-60"
-                style={{ maxHeight: '200px', overflowY: 'auto' }}
-              >
-                <option value="">Все категории</option>
-                {Array.isArray(categories) && categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+        {/* Фильтры и сортировка */}
+        <div className="flex flex-wrap gap-4 mb-4">
+          {/* Фильтр по категориям */}
+          <select
+            value={filters.categoryId}
+            onChange={(e) => handleCategoryFilter(e.target.value)}
+            className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+          >
+            <option value="">Все категории</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
 
-            {/* Фильтр по наличию */}
-            <div>
-              <select
-                value={filters.availability}
-                onChange={(e) => handleAvailabilityFilter(e.target.value as FilterParams['availability'])}
-                className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/70 transition-all duration-300 appearance-none cursor-pointer bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTQgNmw0IDQgNC00IiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-right-4 bg-center-y"
-              >
-                <option value="all">Все товары</option>
-                <option value="available">В наличии</option>
-                <option value="unavailable">Нет в наличии</option>
-              </select>
-            </div>
+          {/* Фильтр по наличию */}
+          <select
+            value={filters.availability}
+            onChange={(e) => handleAvailabilityFilter(e.target.value as 'all' | 'available' | 'unavailable')}
+            className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+          >
+            <option value="all">Все товары</option>
+            <option value="available">В наличии</option>
+            <option value="unavailable">Нет в наличии</option>
+          </select>
 
-            {/* Сортировка */}
-            <div>
-              <select
-                value={filters.sortBy}
-                onChange={(e) => handleSort(e.target.value as FilterParams['sortBy'])}
-                className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/70 transition-all duration-300 appearance-none cursor-pointer bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTQgNmw0IDQgNC00IiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-right-4 bg-center-y"
-              >
-                <option value="name">По названию</option>
-                <option value="price">По цене</option>
-                <option value="category">По категории</option>
-              </select>
-            </div>
-          </div>
+          {/* Сортировка */}
+          <select
+            value={filters.sortBy}
+            onChange={(e) => handleSort(e.target.value as 'name' | 'price' | 'category')}
+            className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+          >
+            <option value="name">Сортировать по названию</option>
+            <option value="price">Сортировать по цене</option>
+            <option value="category">Сортировать по категории</option>
+          </select>
         </div>
 
         {error && (
@@ -589,129 +575,111 @@ export default function ProductsPage() {
           </div>
         )}
 
-        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-xl shadow-black/20 border border-gray-700/50">
-          <table className="min-w-full divide-y divide-gray-700/50">
-            <thead className="bg-gray-700/50">
-              <tr>
-                <th 
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200"
-                  onClick={() => handleSort('name')}
-                >
-                  Название {filters.sortBy === 'name' && (filters.sortOrder === 'asc' ? '↑' : '↓')}
-                </th>
-                <th 
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200"
-                  onClick={() => handleSort('category')}
-                >
-                  Категория {filters.sortBy === 'category' && (filters.sortOrder === 'asc' ? '↑' : '↓')}
-                </th>
-                <th 
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:text-white transition-colors duration-200"
-                  onClick={() => handleSort('price')}
-                >
-                  Цена {filters.sortBy === 'price' && (filters.sortOrder === 'asc' ? '↑' : '↓')}
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Статус</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Изображения</th>
-                <th className="px-6 py-4 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Действия</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700/50">
-              {isLoadingProducts ? (
+        {/* Таблица */}
+        <div className="mt-4 bg-gray-900/50 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-800">
+              <thead className="bg-gray-900/50">
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
-                    <div className="flex justify-center">
-                      <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
-                    </div>
-                    <p className="mt-4 text-gray-400">Загрузка товаров...</p>
-                  </td>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Название
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Категория
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Цена
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Статус
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Изображения
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Описание
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Действия
+                  </th>
                 </tr>
-              ) : products && products.length > 0 ? (
-                products.map((product) => (
-                  <tr key={product.id} className="group hover:bg-primary/5 transition-colors duration-200">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium cursor-pointer" onClick={() => handleEditProduct(product)}>
-                      <span title={product.name}>{truncateText(product.name)}</span>
+              </thead>
+              <tbody className="divide-y divide-gray-800">
+                {products.map((product) => (
+                  <tr
+                    key={product.id}
+                    onClick={() => handleEditProduct(product)}
+                    className="cursor-pointer hover:bg-blue-500/10 transition-colors"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-white font-medium">{product.name}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-400 cursor-pointer" onClick={() => handleEditProduct(product)}>
-                      {product.category?.name || 'Без категории'}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-gray-400">{product.category?.name || 'Без категории'}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-primary cursor-pointer" onClick={() => handleEditProduct(product)}>
-                      {product.price.toLocaleString('ru-RU')} сом
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-blue-500 font-medium">
+                        {product.price.toLocaleString('ru-RU')} сом
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleEditProduct(product)}>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        product.isAvailable 
-                          ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
-                          : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                        product.isAvailable
+                          ? 'bg-green-500/10 text-green-500'
+                          : 'bg-gray-500/10 text-gray-400'
                       }`}>
                         {product.isAvailable ? 'В наличии' : 'Нет в наличии'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleEditProduct(product)}>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex -space-x-3">
                         {(product.images || []).slice(0, 3).map((image, index) => (
                           <img
                             key={image.id || index}
                             src={image.url}
                             alt=""
-                            className="w-10 h-10 rounded-full ring-2 ring-gray-800 object-cover shadow-md hover:scale-110 transition-transform duration-200 z-[1] hover:z-10"
+                            className="w-10 h-10 rounded-full border-2 border-gray-800 object-cover hover:scale-110 transition-transform z-[1] hover:z-10"
                           />
                         ))}
                         {(product.images || []).length > 3 && (
-                          <div className="w-10 h-10 rounded-full ring-2 ring-gray-800 bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-300 shadow-md z-[1]">
+                          <div className="w-10 h-10 rounded-full border-2 border-gray-800 bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-300 z-[1]">
                             +{(product.images || []).length - 3}
                           </div>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex justify-end space-x-2 opacity-100">
-                        <button 
-                          className="text-gray-400 hover:text-primary p-2 transition-colors duration-200"
+                    <td className="px-6 py-4">
+                      <div className="text-gray-400 max-w-xs truncate">
+                        {product.description || 'Нет описания'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex justify-end space-x-2">
+                        <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEditProduct(product);
                           }}
+                          className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
                         >
                           <PencilIcon className="h-5 w-5" />
                         </button>
-                        <button 
-                          className="text-gray-400 hover:text-red-500 p-2 transition-colors duration-200"
+                        <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteProduct(product.id);
                           }}
+                          className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                         >
                           <TrashIcon className="h-5 w-5" />
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
-                    {error ? (
-                      <div className="flex flex-col items-center">
-                        <p className="mb-4">{error}</p>
-                        <button 
-                          onClick={fetchProducts}
-                          className="px-5 py-2.5 bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-600 rounded-lg transition-all duration-300 shadow-lg shadow-primary/20 text-white"
-                        >
-                          Попробовать снова
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center">
-                        <p className="text-xl mb-2">Товары не найдены</p>
-                        <p className="text-gray-500 mb-4">Попробуйте изменить параметры поиска или добавьте новый товар</p>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Пагинация */}
@@ -753,72 +721,75 @@ export default function ProductsPage() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl p-6 w-full max-w-2xl my-8 mx-4 relative overflow-y-auto max-h-[90vh] shadow-2xl border border-gray-700/50 animate-scaleIn">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors duration-200"
-            >
-              <XMarkIcon className="h-6 w-6" />
-            </button>
-            <h2 className="text-2xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400">
-              {editingProduct ? 'Редактировать товар' : 'Добавить новый товар'}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">
+                {editingProduct ? 'Редактировать товар' : 'Добавить новый товар'}
+              </h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-300">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Название
                 </label>
                 <input
                   type="text"
+                  name="name"
                   value={newProduct.name}
                   onChange={handleInputChange}
-                  name="name"
-                  className="w-full px-4 py-3 bg-gray-700/70 rounded-lg focus:ring-2 focus:ring-primary/70 outline-none transition-all duration-200 border border-gray-600/50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-300">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Описание
                 </label>
                 <textarea
+                  name="description"
                   value={newProduct.description}
                   onChange={handleInputChange}
-                  name="description"
-                  rows={6}
-                  className="w-full px-4 py-3 bg-gray-700/70 rounded-lg focus:ring-2 focus:ring-primary/70 outline-none transition-all duration-200 border border-gray-600/50"
+                  rows={4}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-300">
-                  Цена
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Цена (сом)
                 </label>
                 <input
                   type="number"
+                  name="price"
                   value={newProduct.price}
                   onChange={handleInputChange}
-                  name="price"
-                  step="0.01"
-                  className="w-full px-4 py-3 bg-gray-700/70 rounded-lg focus:ring-2 focus:ring-primary/70 outline-none transition-all duration-200 border border-gray-600/50"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-300">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Категория
                 </label>
                 <select
                   name="categoryId"
                   value={newProduct.categoryId}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700/70 rounded-lg focus:ring-2 focus:ring-primary/70 outline-none transition-all duration-200 border border-gray-600/50 appearance-none cursor-pointer bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTQgNmw0IDQgNC00IiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-right-4 bg-center-y"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  required
                 >
                   <option value="">Выберите категорию</option>
-                  {Array.isArray(categories) && categories.map((category) => (
+                  {categories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
                     </option>
@@ -827,16 +798,42 @@ export default function ProductsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-300">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Изображения
                 </label>
-                <div className="relative">
+                <div className="space-y-4">
+                  {editingProduct && editingProduct.images && editingProduct.images.length > 0 && (
+                    <div className="flex flex-wrap gap-4">
+                      {editingProduct.images.map((image) => (
+                        <div key={image.id} className="relative group">
+                          <img
+                            src={image.url}
+                            alt=""
+                            className="w-24 h-24 object-cover rounded-lg border-2 border-gray-700"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteImage(image.id)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <XMarkIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <input
                     type="file"
-                    onChange={handleFileChange}
                     multiple
                     accept="image/*"
-                    className="w-full px-4 py-3 bg-gray-700/70 rounded-lg text-white border border-gray-600/50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary/20 file:text-primary hover:file:bg-primary/30 transition-all duration-200"
+                    onChange={handleFileChange}
+                    className="block w-full text-sm text-gray-400
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-lg file:border-0
+                      file:text-sm file:font-medium
+                      file:bg-blue-600 file:text-white
+                      file:cursor-pointer file:hover:bg-blue-700
+                      file:transition-colors"
                   />
                 </div>
               </div>
@@ -844,68 +841,30 @@ export default function ProductsPage() {
               <div className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={newProduct.isAvailable}
-                  onChange={handleInputChange}
                   name="isAvailable"
-                  className="h-5 w-5 text-primary focus:ring-primary border-gray-600 rounded transition-all duration-200"
+                  checked={newProduct.isAvailable}
+                  onChange={(e) => handleInputChange(e)}
+                  className="w-4 h-4 text-blue-600 border-gray-700 rounded focus:ring-blue-500 focus:ring-offset-gray-900"
                 />
-                <label className="ml-2 block text-sm text-gray-300">
+                <label className="ml-2 text-sm font-medium text-gray-300">
                   В наличии
                 </label>
               </div>
 
-              {/* Текущие изображения */}
-              {editingProduct && (editingProduct.images || editingProduct.productImages).length > 0 && (
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium mb-2 text-gray-300">
-                    Текущие изображения
-                  </label>
-                  <div className="grid grid-cols-3 gap-4">
-                    {(editingProduct.images || editingProduct.productImages).map((image) => (
-                      <div key={image.id} className="relative group overflow-hidden rounded-lg">
-                        <img
-                          src={image.url}
-                          alt=""
-                          className="w-full h-32 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteImage(image.id.toString());
-                          }}
-                          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0 shadow-lg"
-                        >
-                          <XMarkIcon className="h-4 w-4 text-white" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-end space-x-4 mt-8">
+              <div className="flex justify-end gap-4 pt-4 border-t border-gray-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 text-gray-400 hover:text-white transition-colors duration-200 border border-gray-600 hover:border-gray-500 rounded-lg"
+                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
                 >
                   Отмена
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-5 py-2.5 bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-600 rounded-lg transition-all duration-300 shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
-                  {isLoading ? (
-                    <span className="flex items-center">
-                      <span className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></span>
-                      Сохранение...
-                    </span>
-                  ) : (
-                    editingProduct ? 'Сохранить' : 'Создать'
-                  )}
+                  {isLoading ? 'Сохранение...' : editingProduct ? 'Сохранить' : 'Добавить'}
                 </button>
               </div>
             </form>

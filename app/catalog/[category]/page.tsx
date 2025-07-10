@@ -14,7 +14,7 @@ import { TranslationKey } from '@/app/i18n/types';
 import ProductCard from '@/app/components/ProductCard';
 import Link from 'next/link';
 
-const DEFAULT_PRODUCT_IMAGE = '/images/product-default.jpg';
+const DEFAULT_PRODUCT_IMAGE = '/images/product-default.png';
 
 // Компонент для просмотра галереи изображений товара
 function ProductGallery({ images, name, price, t }: { images: any[], name: string, price: number, t: (key: TranslationKey) => string }) {

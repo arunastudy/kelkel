@@ -20,7 +20,7 @@ function transliterate(str: string): string {
 async function createDefaultImage(productId: string) {
   return prisma.image.create({
     data: {
-      url: '/images/product-default.jpg',
+      url: '/images/product-default.png',
       productId: productId
     }
   });

@@ -182,7 +182,7 @@ export default function CartPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
                   <div className="relative w-full sm:w-24 md:w-32 aspect-square sm:aspect-auto sm:h-24 md:h-32 flex-shrink-0 rounded-2xl overflow-hidden bg-gray-100">
                     <Image
-                      src={item.product.images[0]?.url || '/images/product-default.jpg'}
+                      src={item.product.images[0]?.url || '/images/product-default.png'}
                       alt={item.product.name}
                       fill
                       className="object-cover"

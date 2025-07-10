@@ -25,7 +25,7 @@ const Sidebar = () => {
     <div className="fixed left-0 top-0 h-full w-64 bg-gray-900/50 backdrop-blur-xl border-r border-gray-800 text-white p-4">
       <div className="flex items-center space-x-2 mb-8">
         <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-          APAKAI
+          KELKEL
         </span>
         <span className="text-sm text-gray-400">Admin</span>
       </div>
