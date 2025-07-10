@@ -85,7 +85,7 @@ export default function ProductCard({ id, name, price, images, slug }: ProductCa
 
   return (
     <div className="group relative">
-      <Link href={`/product/${slug}`} className="block">
+      <Link href={`/product/${id}`} className="block">
         <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
           {images && images[currentImageIndex] && (
             <Image

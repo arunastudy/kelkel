@@ -357,74 +357,80 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
-            {t('customerReviews')}!!!
+            Отзывы клиентов!!!
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
+            {/* Первый отзыв */}
+            <div className="bg-white p-8 rounded-lg group hover:bg-gradient-to-r hover:from-[#f85125] hover:to-[#ff8b42] transition-all duration-300">
               <div className="mb-6">
-                <div className="text-6xl text-primary opacity-20">"</div>
-                <p className="text-gray-700 mb-6">
-                  {t('review1')}
+                <div className="text-6xl text-[#f85125] opacity-20 group-hover:text-white">"</div>
+                <p className="text-gray-700 group-hover:text-white">
+                  Отличный магазин! Быстрая доставка и качественные товары. Всегда нахожу то, что нужно, по хорошим ценам.
                 </p>
               </div>
               <div className="flex items-center">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden mr-4">
-                    <Image
-                      src="https://randomuser.me/api/portraits/women/83.jpg"
-                      alt="Айжан Б."
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                  <h3 className="font-bold text-lg">Айжан Тазабекова</h3>
-                  <p className="text-gray-600">Программист</p>
+                <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
+                  <Image
+                    src="/images/директор.jpg"
+                    alt="Арлен"
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg group-hover:text-white">Арлен</h3>
+                  <p className="text-gray-600 group-hover:text-white/80">Директор</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-primary text-white p-8 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
+            {/* Второй отзыв */}
+            <div className="bg-white p-8 rounded-lg group hover:bg-gradient-to-r hover:from-[#f85125] hover:to-[#ff8b42] transition-all duration-300">
               <div className="mb-6">
-                <div className="text-6xl opacity-20">"</div>
-                <p className="mb-6">
-                  {t('review2')}
+                <div className="text-6xl text-[#f85125] opacity-20 group-hover:text-white">"</div>
+                <p className="text-gray-700 group-hover:text-white">
+                  Прекрасный сервис и отличное качество обслуживания. Рекомендую всем, кто ищет надежный магазин техники.
                 </p>
               </div>
               <div className="flex items-center">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden mr-4">
-                    <Image
-                      src="https://randomuser.me/api/portraits/men/6.jpg"
-                      alt="Эрлан С."
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                  <h3 className="font-bold text-lg">Абазов Эрлан</h3>
-                  <p className="text-white/80">Бизнесмен</p>
+                <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
+                  <Image
+                    src="/images/директор.jpg"
+                    alt="Эльнура"
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg group-hover:text-white">Эльнура</h3>
+                  <p className="text-gray-600 group-hover:text-white/80">Директор</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-8 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
+            {/* Третий отзыв */}
+            <div className="bg-white p-8 rounded-lg group hover:bg-gradient-to-r hover:from-[#f85125] hover:to-[#ff8b42] transition-all duration-300">
               <div className="mb-6">
-                <div className="text-6xl text-primary opacity-20">"</div>
-                <p className="text-gray-700 mb-6">
-                  {t('review3')}
+                <div className="text-6xl text-[#f85125] opacity-20 group-hover:text-white">"</div>
+                <p className="text-gray-700 group-hover:text-white">
+                  Замечательный выбор техники и профессиональный подход к клиентам. Очень довольна покупками в этом магазине!
                 </p>
               </div>
               <div className="flex items-center">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden mr-4">
-                    <Image
-                      src="https://randomuser.me/api/portraits/women/40.jpg"
-                    alt="Куба А."
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                  <h3 className="font-bold text-lg">Куба Асанов</h3>
-                  <p className="text-gray-600">Юрист</p>
+                <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
+                  <Image
+                    src="/images/гермиона.jpg"
+                    alt="Аруна"
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg group-hover:text-white">Аруна Тазабекова</h3>
+                  <p className="text-gray-600 group-hover:text-white/80">Программист</p>
                 </div>
               </div>
             </div>

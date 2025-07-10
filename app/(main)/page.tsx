@@ -401,77 +401,81 @@ export default function Home() {
       {/* Отзывы клиентов */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 relative">
-            {t('customerReviews')}
-            <div className="absolute w-24 h-1 gradient-primary bottom-0 left-1/2 transform -translate-x-1/2 mt-4"></div>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
+            Отзывы клиентов!!!
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="relative group">
-              <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative p-8 text-white">
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden ring-4 ring-white/30">
-                    <Image
-                      src="https://randomuser.me/api/portraits/women/83.jpg"
-                      alt="Айжан Б."
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Айжан Бекмырзаева</h3>
-                    <p className="text-white/80">{t('regularCustomer')}</p>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Первый отзыв */}
+            <div className="bg-white p-8 rounded-lg group hover:bg-gradient-to-r hover:from-[#f85125] hover:to-[#ff8b42] transition-all duration-300">
+              <div className="mb-6">
+                <div className="text-6xl text-[#f85125] opacity-20 group-hover:text-white">"</div>
+                <p className="text-gray-700 group-hover:text-white">
+                  Отличный магазин! Быстрая доставка и качественные товары. Всегда нахожу то, что нужно, по хорошим ценам.
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
+                  <Image
+                    src="/images/cma6e8yo6000bl8030zicg77b.jpg"
+                    alt="Аруна Т."
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <p className="text-white/90 italic mb-4">{t('review1')}</p>
-                <div className="flex text-yellow-300">
-                  {'★'.repeat(5)}
+                <div>
+                  <h3 className="font-bold text-lg group-hover:text-white">Аруна Тазабекова</h3>
+                  <p className="text-gray-600 group-hover:text-white/80">Программист</p>
                 </div>
               </div>
             </div>
-            <div className="relative group">
-              <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative p-8 text-white">
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden ring-4 ring-white/30">
-                    <Image
-                      src="https://randomuser.me/api/portraits/men/6.jpg"
-                      alt="Эрлан С."
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Эрлан Садыков</h3>
-                    <p className="text-white/80">{t('newCustomer')}</p>
-                  </div>
+
+            {/* Второй отзыв */}
+            <div className="bg-white p-8 rounded-lg group hover:bg-gradient-to-r hover:from-[#f85125] hover:to-[#ff8b42] transition-all duration-300">
+              <div className="mb-6">
+                <div className="text-6xl text-[#f85125] opacity-20 group-hover:text-white">"</div>
+                <p className="text-gray-700 group-hover:text-white">
+                  Впервые заказал здесь и остался очень доволен. Сервис на высоте, буду рекомендовать друзьям!
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
+                  <Image
+                    src="/images/cma6e5bv90009l803d5jijps0.jpg"
+                    alt="Арлен Н."
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <p className="text-white/90 italic mb-4">{t('review2')}</p>
-                <div className="flex text-yellow-300">
-                  {'★'.repeat(5)}
+                <div>
+                  <h3 className="font-bold text-lg group-hover:text-white">Арлен Нурбеков</h3>
+                  <p className="text-gray-600 group-hover:text-white/80">Инженер</p>
                 </div>
               </div>
             </div>
-            <div className="relative group">
-              <div className="absolute inset-0 gradient-primary rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"></div>
-              <div className="relative p-8 text-white">
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden ring-4 ring-white/30">
-                    <Image
-                      src="https://randomuser.me/api/portraits/women/40.jpg"
-                      alt="Гулзат Т."
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Гулзат Турусбекова</h3>
-                    <p className="text-white/80">{t('regularCustomer')}</p>
-                  </div>
+
+            {/* Третий отзыв */}
+            <div className="bg-white p-8 rounded-lg group hover:bg-gradient-to-r hover:from-[#f85125] hover:to-[#ff8b42] transition-all duration-300">
+              <div className="mb-6">
+                <div className="text-6xl text-[#f85125] opacity-20 group-hover:text-white">"</div>
+                <p className="text-gray-700 group-hover:text-white">
+                  Отзывчивая поддержка и удобный сайт. Заказываю уже третий раз, всё всегда на высшем уровне!
+                </p>
+              </div>
+              <div className="flex items-center">
+                <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
+                  <Image
+                    src="/images/cma6ed1s5000fl8037bv9177b.jpg"
+                    alt="Эльнура А."
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <p className="text-white/90 italic mb-4">{t('review3')}</p>
-                <div className="flex text-yellow-300">
-                  {'★'.repeat(5)}
+                <div>
+                  <h3 className="font-bold text-lg group-hover:text-white">Эльнура Алиева</h3>
+                  <p className="text-gray-600 group-hover:text-white/80">Юрист</p>
                 </div>
               </div>
             </div>

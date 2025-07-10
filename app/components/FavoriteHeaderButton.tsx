@@ -18,8 +18,14 @@ export default function FavoriteHeaderButton({ showText = false }: FavoriteHeade
     const updateFavoritesCount = () => {
       const favorites = Cookies.get('favorites');
       if (favorites) {
-        const favoritesList = JSON.parse(favorites) as string[];
-        setItemsCount(favoritesList.length);
+        try {
+          const favoritesList = JSON.parse(favorites) as string[];
+          setItemsCount(favoritesList.length);
+        } catch (error) {
+          console.error('Error parsing favorites:', error);
+          setItemsCount(0);
+          Cookies.remove('favorites');
+        }
       } else {
         setItemsCount(0);
       }

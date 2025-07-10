@@ -178,6 +178,14 @@ export const translations = {
     // Валидация телефона
     phoneRequired: 'Введите номер телефона',
     invalidPhone: 'Неверный формат номера телефона',
+
+    // Калькулятор рассрочки
+    installmentCalculator: 'Рассрочка',
+    months: 'мес',
+    originalPrice: 'Цена:',
+    markup: 'Наценка',
+    totalAmount: 'Итого:',
+    monthlyPayment: 'Ежемесячный платеж:',
   },
   ky: {
     // Навигация
@@ -358,5 +366,13 @@ export const translations = {
     // Валидация телефона
     phoneRequired: 'Телефон номерин киргизиңиз',
     invalidPhone: 'Телефон номеринин форматы туура эмес',
+
+    // Калькулятор рассрочки
+    installmentCalculator: 'Бөлүп төлөө',
+    months: 'ай',
+    originalPrice: 'Баасы:',
+    markup: 'Кошумча баа',
+    totalAmount: 'Жалпы:',
+    monthlyPayment: 'Айлык төлөм:',
   }
 }; 

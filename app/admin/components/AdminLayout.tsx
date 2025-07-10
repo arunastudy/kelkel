@@ -7,7 +7,8 @@ import {
   TagIcon, 
   ShoppingBagIcon, 
   Cog6ToothIcon,
-  HomeIcon
+  HomeIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/solid';
 import LogoutButton from './LogoutButton';
 
@@ -17,6 +18,7 @@ const Sidebar = () => {
     { name: 'Категории', icon: TagIcon, href: '/admin/categories' },
     { name: 'Товары', icon: ShoppingBagIcon, href: '/admin/products' },
     { name: 'Настройки', icon: Cog6ToothIcon, href: '/admin/settings' },
+    { name: 'Рассрочки', icon: CreditCardIcon, href: '/admin/settings/installment' },
   ];
 
   return (

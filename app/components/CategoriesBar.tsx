@@ -38,11 +38,14 @@ export default function CategoriesBar() {
           <Link
             key={category.id}
             href={`/catalog/${category.id}`}
-            className="flex-shrink-0 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm text-gray-600 
+            className={`flex-shrink-0 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm text-gray-600 
                      border border-gray-200 rounded-full 
-                     hover:border-[#f85125] hover:bg-[#f85125]/10 hover:text-[#f85125]
-                     transition-colors whitespace-nowrap
-                     bg-transparent"
+                     ${['Микроволновки', 'Пылесос', 'Телевизор', 'Холодильник'].includes(category.name) 
+                       ? 'hover:bg-gradient-to-r hover:from-[#f85125] hover:to-[#ff8b42]' 
+                       : 'hover:bg-[#f85125]'} 
+                     hover:text-white hover:border-[#f85125]
+                     transition-all duration-300 whitespace-nowrap
+                     bg-transparent`}
           >
             {category.name}
           </Link>

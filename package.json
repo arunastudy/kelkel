@@ -8,7 +8,8 @@
     "start": "next start",
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && next build",
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
+    "add-products": "ts-node scripts/add-products.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
@@ -41,6 +42,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.9.0",
     "@tailwindcss/forms": "^0.5.10",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",

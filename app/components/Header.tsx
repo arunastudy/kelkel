@@ -124,7 +124,7 @@ export default function Header() {
               {/* Навигация */}
               <div className="flex items-center space-x-1 sm:space-x-6">
                 <div className="rounded-lg hover:bg-[#f85125]/10 transition-colors h-10 flex items-center">
-                  <LanguageToggle />
+                <LanguageToggle />
                 </div>
                 
                 {/* Каталог - скрыть на мобильных */}
