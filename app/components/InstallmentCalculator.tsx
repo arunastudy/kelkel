@@ -97,22 +97,22 @@ export default function InstallmentCalculator({ price }: InstallmentCalculatorPr
       {selectedOption && calculations && (
         <div className="space-y-2 text-sm">
           <div className="flex justify-between text-gray-600">
-            <span>{t('originalPrice')}:</span>
+            <span>{t('originalPrice')}</span>
             <span className="font-medium">{price.toLocaleString('ru-RU')} {t('currency')}</span>
           </div>
           
           <div className="flex justify-between text-gray-600">
-            <span>{t('markup')} ({selectedOption.percent}%):</span>
+            <span>{t('markup')}:</span>
             <span className="font-medium">+{calculations.markup.toLocaleString('ru-RU')} {t('currency')}</span>
           </div>
           
           <div className="flex justify-between text-gray-900 font-medium">
-            <span>{t('totalAmount')}:</span>
+            <span>{t('totalAmount')}</span>
             <span>{calculations.totalAmount.toLocaleString('ru-RU')} {t('currency')}</span>
           </div>
           
           <div className="flex justify-between text-primary font-medium pt-2 border-t">
-            <span>{t('monthlyPayment')}:</span>
+            <span>{t('monthlyPayment')}</span>
             <span>{Math.ceil(calculations.monthlyPayment).toLocaleString('ru-RU')} {t('currency')}</span>
           </div>
         </div>
