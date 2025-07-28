@@ -14,16 +14,12 @@ import {
   HeartIcon,
   ClipboardDocumentIcon
 } from '@heroicons/react/24/outline';
-import FavoriteHeaderButton from '../components/FavoriteHeaderButton';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CalendarDateRangeIcon } from '@heroicons/react/24/solid';
 import { useLanguageContext } from '../contexts/LanguageContext';
-import { LanguageToggle } from '../components/LanguageToggle';
-import CategoriesBar from '../components/CategoriesBar';
 import ImageCarousel from '../components/ImageCarousel';
 import ProductCard from '../components/ProductCard';
-import SearchBar from '@/app/components/SearchBar';
 
 interface Product {
   id: string;
@@ -38,12 +34,8 @@ interface FAQItem {
   answer: string;
 }
 
-
-
 export default function Home() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [carouselImages, setCarouselImages] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -104,33 +96,6 @@ export default function Home() {
     return () => clearTimeout(debounceTimeout);
   }, [searchQuery]);
 
-  // Закрываем меню при изменении размера экрана
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsMobileMenuOpen(false);
-        document.body.style.overflow = '';
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Обработчик для клавиши Escape
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsMobileMenuOpen(false);
-        setIsSearchFocused(false);
-        document.body.style.overflow = '';
-      }
-    };
-
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, []);
-
   const faqs: FAQItem[] = [
     {
       question: t('faqQuestion1'),
@@ -150,24 +115,8 @@ export default function Home() {
     setOpenFAQ(openFAQ === index ? null : index);
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-    document.body.style.overflow = !isMobileMenuOpen ? 'hidden' : '';
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-    document.body.style.overflow = '';
-  };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
-
-
       {searchQuery ? (
         /* Результаты поиска */
         <section className="py-8 bg-gray-50">
@@ -231,9 +180,6 @@ export default function Home() {
           </section>
         </>
       )}
-
-      {/* Мобильное меню */}
-
 
       {/* О нас */}
       <section className="py-20 bg-white">
@@ -385,7 +331,7 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
-            Отзывы клиентов!!!
+            Отзывы клиентов
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Первый отзыв */}
@@ -398,13 +344,9 @@ export default function Home() {
               </div>
               <div className="flex items-center">
                 <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
-                  <Image
-                    src="/images/cma6e8yo6000bl8030zicg77b.jpg"
-                    alt="Аруна Т."
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-cover"
-                  />
+                  <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                    <span className="text-gray-600">A</span>
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-bold text-lg group-hover:text-white">Аруна Тазабекова</h3>
@@ -423,13 +365,9 @@ export default function Home() {
               </div>
               <div className="flex items-center">
                 <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
-                  <Image
-                    src="/images/cma6e5bv90009l803d5jijps0.jpg"
-                    alt="Арлен Н."
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-cover"
-                  />
+                  <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                    <span className="text-gray-600">А</span>
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-bold text-lg group-hover:text-white">Арлен Нурбеков</h3>
@@ -448,13 +386,9 @@ export default function Home() {
               </div>
               <div className="flex items-center">
                 <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
-                  <Image
-                    src="/images/cma6ed1s5000fl8037bv9177b.jpg"
-                    alt="Эльнура А."
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-cover"
-                  />
+                  <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                    <span className="text-gray-600">Э</span>
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-bold text-lg group-hover:text-white">Эльнура Алиева</h3>
@@ -509,13 +443,6 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div>
               <div className="flex items-center space-x-2 mb-6">
-                <Image
-                  src="/images/logo.svg"
-                  alt="KELKEL"
-                  width={40}
-                  height={40}
-                  className="w-auto h-8"
-                />
                 <span className="text-2xl font-bold gradient-text">
                   АПАКАЙ
                 </span>
