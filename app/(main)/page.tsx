@@ -14,16 +14,15 @@ import {
   HeartIcon,
   ClipboardDocumentIcon
 } from '@heroicons/react/24/outline';
-import FavoriteHeaderButton from './components/FavoriteHeaderButton';
+import FavoriteHeaderButton from '../components/FavoriteHeaderButton';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CalendarDateRangeIcon } from '@heroicons/react/24/solid';
-import { useLanguageContext } from './contexts/LanguageContext';
-import { LanguageToggle } from './components/LanguageToggle';
-import CategoriesBar from './components/CategoriesBar';
-import ImageCarousel from './components/ImageCarousel';
-import ProductCard from './components/ProductCard';
-import { prisma } from '../lib/prisma';
+import { useLanguageContext } from '../contexts/LanguageContext';
+import { LanguageToggle } from '../components/LanguageToggle';
+import CategoriesBar from '../components/CategoriesBar';
+import ImageCarousel from '../components/ImageCarousel';
+import ProductCard from '../components/ProductCard';
 import SearchBar from '@/app/components/SearchBar';
 
 interface Product {
@@ -39,23 +38,7 @@ interface FAQItem {
   answer: string;
 }
 
-async function getProducts() {
-  try {
-    const products = await prisma.product.findMany({
-      take: 12,
-      orderBy: {
-        name: 'asc'
-      },
-      include: {
-        images: true
-      }
-    });
-    return products;
-  } catch (error) {
-    console.error('Ошибка при получении товаров:', error);
-    return [];
-  }
-}
+
 
 export default function Home() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
