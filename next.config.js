@@ -20,9 +20,6 @@ const nextConfig = {
   },
   swcMinify: true,
   reactStrictMode: true,
-  experimental: {
-    serverActions: false,
-  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
