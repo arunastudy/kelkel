@@ -91,9 +91,10 @@ export default function Home() {
       try {
         const response = await fetch('/api/products/featured');
         const data = await response.json();
-        setProducts(data);
+        setProducts(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Ошибка при загрузке товаров:', error);
+        setProducts([]);
       }
     };
 

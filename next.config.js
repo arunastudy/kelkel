@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove output: 'standalone' as it can cause issues with client modules
+  output: 'standalone',
   images: {
     unoptimized: true,
     domains: ['localhost', 'vercel.app'],
@@ -21,11 +21,8 @@ const nextConfig = {
   swcMinify: true,
   reactStrictMode: true,
   experimental: {
-    // Add this to help with module resolution
-    esmExternals: 'loose',
+    serverActions: true,
   },
-  // Add this to handle dynamic routes
-  trailingSlash: false,
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
