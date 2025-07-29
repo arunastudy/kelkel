@@ -21,7 +21,7 @@ const nextConfig = {
   swcMinify: true,
   reactStrictMode: true,
   experimental: {
-    serverActions: true,
+    serverActions: false,
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
