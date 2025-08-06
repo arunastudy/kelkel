@@ -1,43 +1,34 @@
-# Базовый образ Node.js 20 Alpine
-FROM node:20-alpine AS base
+FROM node:18-alpine AS base
 
-# Слой для установки зависимостей
+# Установка зависимостей для сборки
 FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Устанавливаем необходимые системные зависимости
-RUN apk add --no-cache libc6-compat python3 make g++ build-base
-
-# Копируем файлы зависимостей
+# Копируем файлы package.json и package-lock.json
 COPY package.json package-lock.json ./
-COPY prisma ./prisma/
 
-# Устанавливаем зависимости с настройками для стабильности
-RUN npm config set registry https://registry.npmjs.org/ && \
-    npm config set fetch-retry-maxtimeout 600000 && \
-    npm config set fetch-retry-mintimeout 100000 && \
-    npm config set fetch-timeout 600000 && \
-    npm install --legacy-peer-deps --no-audit --no-fund && \
-    npm install sharp
+# Устанавливаем зависимости
+RUN npm ci
 
-# Слой для сборки приложения
+# Сборка приложения
 FROM base AS builder
 WORKDIR /app
 
-# Передаем DATABASE_URL на этапе сборки
-ARG DATABASE_URL
-ENV DATABASE_URL=${DATABASE_URL}
-
-# Отключаем телеметрию Next.js на этапе сборки
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV=production
-
-# Копируем зависимости из предыдущего слоя
+# Копируем зависимости из предыдущего этапа
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/prisma ./prisma
-
-# Копируем всё остальное
 COPY . .
+
+# Устанавливаем дополнительные зависимости для Tailwind
+RUN npm install -D @tailwindcss/forms
+
+# Переменные окружения для сборки
+ARG DATABASE_URL
+ARG IMGBB_API_KEY
+ARG TELEGRAM_BOT_TOKEN
+ENV DATABASE_URL=$DATABASE_URL
+ENV IMGBB_API_KEY=$IMGBB_API_KEY
+ENV TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
 
 # Генерация Prisma Client и сборка
 RUN npx prisma generate
@@ -47,31 +38,28 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-# Устанавливаем libc6-compat для совместимости с некоторыми пакетами (например, sharp)
-RUN apk add --no-cache libc6-compat
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Создание пользователя
-RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 nextjs
-
-# Копируем только необходимые артефакты для продакшена
+# Копируем необходимые файлы
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 
-# Создаем необходимые директории и устанавливаем права
-RUN mkdir -p .next/cache/images && \
-    chown -R nextjs:nodejs .next && \
-    chown -R nextjs:nodejs /app
+# Устанавливаем только production зависимости
+COPY package.json package-lock.json ./
+RUN npm ci --only=production
 
+# Добавляем пользователя для безопасности
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+RUN chown -R nextjs:nodejs /app
 USER nextjs
 
-ENV NODE_ENV=production
+EXPOSE 3000
+
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-ENV NEXT_TELEMETRY_DISABLED 1
-
-EXPOSE 3000
 
 CMD ["node", "server.js"]
