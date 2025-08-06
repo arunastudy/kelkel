@@ -1,10 +1,5 @@
 import { Product, Category, Image } from '@/app/types/index';
-import { Pool } from 'pg';
 import { PrismaClient, Prisma } from '@prisma/client';
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
-});
 
 const prisma = new PrismaClient();
 
@@ -34,7 +29,7 @@ export async function getCategories(
       include: {
         products: {
           where: {
-            isAvailable: true // Фильтруем только доступные товары
+            isAvailable: true
           }
         }
       }
@@ -45,7 +40,7 @@ export async function getCategories(
   return {
     categories: categories.map(cat => ({
       ...cat,
-      productsCount: cat.products.length // Теперь это количество только доступных товаров
+      productsCount: cat.products.length
     })),
     total,
     totalPages: Math.ceil(total / pageSize),
@@ -54,11 +49,6 @@ export async function getCategories(
 }
 
 type PriceRange = 'under_50000' | '50000_100000' | 'over_100000';
-const priceRanges: Record<PriceRange, string> = {
-  under_50000: 'price < 50000',
-  '50000_100000': 'price >= 50000 AND price <= 100000',
-  over_100000: 'price > 100000'
-};
 
 export async function getProducts(
   categoryId: string,
@@ -83,7 +73,6 @@ export async function getProducts(
     ];
   }
 
-  // Добавляем фильтры по цене
   if (filters.price_range) {
     const priceRanges: Record<string, { gte?: number; lte?: number }> = {
       under_50000: { lte: 50000 },
@@ -163,4 +152,4 @@ export async function getTelegramId() {
     console.error('Error getting telegram_id:', error);
     throw error;
   }
-} 
+}
