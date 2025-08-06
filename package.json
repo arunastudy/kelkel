@@ -39,6 +39,7 @@
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.0.1",
+    "read-package-up": "^11.0.0",
     "slugify": "^1.6.6",
     "tailwindcss": "^3.4.1",
     "uploadthing": "^7.6.0",

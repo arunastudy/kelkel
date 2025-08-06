@@ -11,6 +11,7 @@ COPY prisma ./prisma/
 
 # Устанавливаем все зависимости (включая devDependencies)
 RUN npm install --production=false
+RUN npm install read-package-up
 
 # Генерируем Prisma Client
 RUN npx prisma generate
@@ -31,6 +32,8 @@ ARG TELEGRAM_BOT_TOKEN
 ENV DATABASE_URL=$DATABASE_URL
 ENV IMGBB_API_KEY=$IMGBB_API_KEY
 ENV TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
 # Генерация Prisma Client и сборка
 RUN npx prisma generate
@@ -50,10 +53,12 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/read-package-up ./node_modules/read-package-up
 
 # Копируем package.json и устанавливаем только production зависимости
 COPY package.json ./
 RUN npm install --omit=dev
+RUN npm install read-package-up
 
 # Добавляем пользователя для безопасности
 RUN addgroup --system --gid 1001 nodejs
