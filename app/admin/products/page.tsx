@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon, MagnifyingGlassIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { generateSlug } from '@/app/utils/helpers';
-import { v2 as cloudinary } from 'cloudinary';
+
 import ImportExportModal from '@/app/components/ImportExportModal';
 
 interface Category {
@@ -53,33 +53,15 @@ interface FilterParams {
   sortOrder: 'asc' | 'desc';
   page: number;
   perPage: number;
-}
+}// Конфигурация Cloudinary
 
-// Конфигурация Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
-// Функция для удаления изображения из Cloudinary через API
+// Функция для удаления изображения
 async function deleteImage(url: string) {
-  try {
-    const response = await fetch(`/api/admin/cloudinary?url=${encodeURIComponent(url)}`, {
-      method: 'DELETE',
-    });
-    
-    if (!response.ok) {
-      throw new Error('Ошибка при удалении изображения');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error deleting image:', error);
-    throw error;
-  }
+  // В локальной версии мы не удаляем физические файлы
+  // для предотвращения проблем с правами доступа и безопасностью
+  return true;
 }
-
 export default function ProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -130,7 +112,7 @@ export default function ProductsPage() {
         perPage: filters.perPage.toString()
       });
 
-      const response = await fetch(`/api/admin/products?${searchParams}`, {
+      const response = await fetch(`/api/admin/products?${searchParams.toString()}`, {
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
           'Pragma': 'no-cache',
@@ -158,7 +140,7 @@ export default function ProductsPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/admin/categories?all=true'); // Запрашиваем все категории
+      const response = await fetch('/api/admin/categories'); // Запрашиваем все категории
       if (!response.ok) {
         throw new Error('Ошибка при загрузке категорий');
       }
@@ -212,6 +194,7 @@ export default function ProductsPage() {
     const uploadedUrls: string[] = [];
     
     for (const file of selectedFiles) {
+      try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('name', name);
@@ -221,9 +204,20 @@ export default function ProductsPage() {
         body: formData
       });
       
-      if (response.ok) {
-        const { imageUrl } = await response.json();
-        uploadedUrls.push(imageUrl);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Ошибка при загрузке изображения');
+        }
+        
+        const data = await response.json();
+        if (data.imageUrl) {
+          uploadedUrls.push(data.imageUrl);
+        } else {
+          throw new Error('Не получен URL изображения');
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        throw error;
       }
     }
     
@@ -900,3 +894,5 @@ export default function ProductsPage() {
     </div>
   );
 } 
+
+

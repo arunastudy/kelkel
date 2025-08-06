@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import { writeFile, mkdir } from 'fs/promises';
 
-export const dynamic = 'force-dynamic';
+const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
 
 export async function POST(request: NextRequest) {
   try {
+    if (!IMGBB_API_KEY) {
+      throw new Error('IMGBB_API_KEY не найден в переменных окружения');
+    }
+
     const formData = await request.formData();
-    const file = formData.get('file') as Blob;
-    const name = formData.get('name') as string;
+    const file = formData.get('file') as File;
 
     if (!file) {
       return NextResponse.json(
@@ -17,30 +18,50 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Создаем безопасное имя файла
-    const fileName = `${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}${path.extname(file.name || '.jpg')}`;
-    
-    // Путь для сохранения файла
-    const publicImagesPath = path.join(process.cwd(), 'public', 'images');
-    const filePath = path.join(publicImagesPath, fileName);
-    
-    // Создаем директорию если её нет
-    await mkdir(publicImagesPath, { recursive: true });
-    
-    // Конвертируем Blob в Buffer и сохраняем файл
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
+    // Конвертируем файл в base64
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const base64Image = buffer.toString('base64');
 
-    // Возвращаем относительный URL для сохранения в БД
-    const imageUrl = `/images/${fileName}`;
+    // Создаем URLSearchParams для отправки данных
+    const params = new URLSearchParams();
+    params.append('key', IMGBB_API_KEY);
+    params.append('image', base64Image);
+
+    // Отправляем запрос к imgbb API
+    const response = await fetch('https://api.imgbb.com/1/upload', {
+      method: 'POST',
+      body: params,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('ImgBB API error:', errorData);
+      throw new Error('Ошибка при загрузке изображения на imgbb');
+    }
+
+    const data = await response.json();
     
-    return NextResponse.json({ imageUrl });
+    if (!data.data?.url) {
+      console.error('ImgBB response:', data);
+      throw new Error('Некорректный ответ от imgbb');
+    }
+
+    // Возвращаем URL загруженного изображения
+    return NextResponse.json({ 
+      imageUrl: data.data.url,
+      // Также возвращаем дополнительные URL, которые могут быть полезны
+      thumbnailUrl: data.data.thumb?.url,
+      mediumUrl: data.data.medium?.url,
+      deleteUrl: data.data.delete_url
+    });
   } catch (error) {
     console.error('Error uploading file:', error);
     return NextResponse.json(
-      { error: 'Ошибка при загрузке файла' },
+      { error: error instanceof Error ? error.message : 'Ошибка при загрузке файла' },
       { status: 500 }
     );
   }
-} 
+}

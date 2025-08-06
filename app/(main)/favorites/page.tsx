@@ -18,6 +18,7 @@ interface Product {
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { t } = useLanguageContext();
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function FavoritesPage() {
         setFavorites(data.products);
       } catch (error) {
         console.error('Error loading favorites:', error);
+        setError(t('error'));
       }
       setIsLoading(false);
     };
@@ -72,8 +74,38 @@ export default function FavoritesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="relative bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{t('favorites')}</h1>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="relative bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{t('favorites')}</h1>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <p className="text-red-500">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90"
+            >
+              {t('tryAgainLater')}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -121,11 +153,7 @@ export default function FavoritesPage() {
           {favorites.map((product) => (
             <ProductCard
               key={product.id}
-              id={product.id}
-              name={product.name}
-              price={product.price}
-              images={product.images}
-              slug={product.slug}
+              product={product}
             />
           ))}
         </div>

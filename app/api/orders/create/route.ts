@@ -27,7 +27,17 @@ export async function POST(request: Request) {
       );
     }
     
-    const telegramId = telegramSetting.value;
+    // Проверяем формат Telegram ID
+    const telegramId = telegramSetting.value.trim();
+    console.log('Using Telegram ID:', telegramId); // Добавляем логирование
+
+    // Проверяем, что ID является числом
+    if (!/^-?\d+$/.test(telegramId)) {
+      return NextResponse.json(
+        { error: 'Неверный формат Telegram ID. ID должен быть числом.' },
+        { status: 400 }
+      );
+    }
     
     // Формируем сообщение для отправки в Telegram
     const message = formatOrderMessage(data);
@@ -35,10 +45,26 @@ export async function POST(request: Request) {
     // Отправляем сообщение в Telegram
     const telegramResponse = await sendTelegramMessage(telegramId, message);
     
-    if (!telegramResponse.ok) {
-      const telegramError = await telegramResponse.text();
-      console.error('Telegram API error:', telegramError);
-      throw new Error('Ошибка при отправке сообщения в Telegram');
+    // Проверяем ответ от Telegram API
+    const telegramResult = await telegramResponse.json();
+    
+    if (!telegramResult.ok) {
+      console.error('Telegram API Error:', telegramResult);
+      
+      // Возвращаем более информативную ошибку
+      let errorMessage = 'Ошибка при отправке сообщения в Telegram';
+      if (telegramResult.description) {
+        if (telegramResult.description.includes('chat not found')) {
+          errorMessage = 'Чат не найден. Убедитесь, что вы начали диалог с ботом и ID указан верно.';
+        } else {
+          errorMessage = `Ошибка Telegram: ${telegramResult.description}`;
+        }
+      }
+      
+      return NextResponse.json(
+        { error: errorMessage },
+        { status: 400 }
+      );
     }
     
     return NextResponse.json({ success: true });
@@ -85,6 +111,8 @@ async function sendTelegramMessage(chatId: string, message: string) {
     throw new Error('TELEGRAM_BOT_TOKEN не настроен в переменных окружения');
   }
   
+  console.log('Sending message to Telegram chat ID:', chatId); // Добавляем логирование
+  
   // Отправляем сообщение через Telegram Bot API
   return fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: 'POST',
@@ -97,4 +125,4 @@ async function sendTelegramMessage(chatId: string, message: string) {
       parse_mode: 'Markdown',
     }),
   });
-} 
+}

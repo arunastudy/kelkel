@@ -17,31 +17,17 @@ import FavoriteHeaderButton from './FavoriteHeaderButton';
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const { t } = useLanguageContext();
 
-  // Поиск товаров
+  // Получаем начальное значение из URL при монтировании
   useEffect(() => {
-    const searchProducts = async () => {
-      if (!searchQuery.trim()) {
-        setSearchResults([]);
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/products?search=${encodeURIComponent(searchQuery)}`);
-        const data = await response.json();
-        setSearchResults(data.products || []);
-      } catch (error) {
-        console.error('Ошибка при поиске товаров:', error);
-        setSearchResults([]);
-      }
-    };
-
-    const debounceTimeout = setTimeout(searchProducts, 300);
-    return () => clearTimeout(debounceTimeout);
-  }, [searchQuery]);
+    const searchParams = new URLSearchParams(window.location.search);
+    const q = searchParams.get('q');
+    if (q) {
+      setSearchQuery(q);
+    }
+  }, []);
 
   // Закрываем меню при изменении размера экрана
   useEffect(() => {
@@ -82,6 +68,10 @@ export default function Header() {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    // Не перенаправляем, если мы уже на странице поиска
+    if (!window.location.pathname.startsWith('/search')) {
+      window.location.href = `/search?q=${encodeURIComponent(query)}`;
+    }
   };
 
   return (
@@ -89,12 +79,6 @@ export default function Header() {
       {/* Навигация */}
       <nav 
         className="sticky top-0 z-40 backdrop-blur-md bg-white/80 border-b border-gray-100"
-        onClick={(e) => {
-          const target = e.target as HTMLElement;
-          if (!target.closest('.search-container')) {
-            setIsSearchFocused(false);
-          }
-        }}
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">

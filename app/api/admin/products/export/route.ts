@@ -6,14 +6,23 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    // Получаем все категории
+    // Получаем все категории с их продуктами
     const categories = await prisma.category.findMany({
       include: {
         products: {
           select: {
             id: true,
             name: true,
+            description: true,
             price: true,
+            isAvailable: true,
+            slug: true,
+            images: {
+              select: {
+                id: true,
+                url: true
+              }
+            }
           }
         }
       }
@@ -24,7 +33,8 @@ export async function GET() {
     workbook.Props = {
       Title: "Продукты",
       Subject: "Экспорт товаров",
-      Author: "Система"
+      Author: "Система",
+      CreatedDate: new Date()
     };
 
     // Для каждой категории создаем отдельный лист
@@ -33,22 +43,66 @@ export async function GET() {
       const sheetData = category.products.map(product => ({
         'ID': product.id,
         'Название': product.name,
-        'Цена': product.price
+        'Описание': product.description || '',
+        'Цена': product.price,
+        'В наличии': product.isAvailable ? 'Да' : 'Нет',
+        'URL': product.slug,
+        'Изображения': product.images.map(img => img.url).join(', ')
       }));
 
-      // Создаем лист
-      const worksheet = XLSX.utils.json_to_sheet(sheetData);
+      if (sheetData.length > 0) {
+        // Создаем лист только если есть данные
+        const worksheet = XLSX.utils.json_to_sheet(sheetData);
 
-      // Устанавливаем ширину столбцов
+        // Устанавливаем ширину столбцов
+        const colWidths = [
+          { wch: 40 }, // ID
+          { wch: 50 }, // Название
+          { wch: 60 }, // Описание
+          { wch: 15 }, // Цена
+          { wch: 15 }, // В наличии
+          { wch: 30 }, // URL
+          { wch: 100 }, // Изображения
+        ];
+        worksheet['!cols'] = colWidths;
+
+        // Добавляем лист в книгу
+        XLSX.utils.book_append_sheet(workbook, worksheet, category.name);
+      }
+    }
+
+    // Создаем общий лист со всеми продуктами
+    const allProducts = categories.flatMap(category => 
+      category.products.map(product => ({
+        'ID': product.id,
+        'Категория': category.name,
+        'Название': product.name,
+        'Описание': product.description || '',
+        'Цена': product.price,
+        'В наличии': product.isAvailable ? 'Да' : 'Нет',
+        'URL': product.slug,
+        'Изображения': product.images.map(img => img.url).join(', ')
+      }))
+    );
+
+    if (allProducts.length > 0) {
+      const allProductsWorksheet = XLSX.utils.json_to_sheet(allProducts);
+      
+      // Устанавливаем ширину столбцов для общего листа
       const colWidths = [
         { wch: 40 }, // ID
+        { wch: 30 }, // Категория
         { wch: 50 }, // Название
+        { wch: 60 }, // Описание
         { wch: 15 }, // Цена
+        { wch: 15 }, // В наличии
+        { wch: 30 }, // URL
+        { wch: 100 }, // Изображения
       ];
-      worksheet['!cols'] = colWidths;
+      allProductsWorksheet['!cols'] = colWidths;
 
-      // Добавляем лист в книгу
-      XLSX.utils.book_append_sheet(workbook, worksheet, category.name);
+      // Добавляем общий лист в начало книги
+      XLSX.utils.book_append_sheet(workbook, allProductsWorksheet, 'Все товары', true);
     }
 
     // Генерируем файл
@@ -69,4 +123,4 @@ export async function GET() {
   } finally {
     await prisma.$disconnect();
   }
-} 
+}

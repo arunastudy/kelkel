@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
-import { DEFAULT_PRODUCT_IMAGE } from '../route';
+import { DEFAULT_PRODUCT_IMAGE } from '@/app/constants/products';
 
 const prisma = new PrismaClient();
 

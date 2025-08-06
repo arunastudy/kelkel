@@ -16,9 +16,6 @@ interface CartInfo {
   sum: number;
 }
 
-// Создаем кастомное событие для обновления корзины
-const CART_UPDATE_EVENT = 'cartUpdate';
-
 export default function FloatingCart() {
   const [cartInfo, setCartInfo] = useState<CartInfo>({ count: 0, sum: 0 });
   const pathname = usePathname();
@@ -34,36 +31,51 @@ export default function FloatingCart() {
   };
 
   useEffect(() => {
-    // Обновляем информацию при монтировании компонента
-    const cart = Cookies.get('cart');
-    if (cart) {
-      try {
-        const cartData = JSON.parse(cart) as CartData;
-        const prices = JSON.parse(localStorage.getItem('cartPrices') || '{}');
-        setCartInfo(calculateCartInfo(cartData, prices));
-      } catch (error) {
-        console.error('Error calculating cart info:', error);
+    const updateCartInfo = () => {
+      const cart = Cookies.get('cart');
+      if (cart) {
+        try {
+          const cartData = JSON.parse(cart) as CartData;
+          const prices = JSON.parse(localStorage.getItem('cartPrices') || '{}');
+          const info = calculateCartInfo(cartData, prices);
+          console.log('Cart updated:', info); // Добавляем лог для отладки
+          setCartInfo(info);
+        } catch (error) {
+          console.error('Error calculating cart info:', error);
+          setCartInfo({ count: 0, sum: 0 });
+        }
+      } else {
+        setCartInfo({ count: 0, sum: 0 });
       }
-    }
-
-    // Подписываемся на событие обновления корзины
-    const handleCartUpdate = (event: CustomEvent) => {
-      const { cartData, productId, price } = event.detail;
-      
-      // Обновляем цены в localStorage
-      const prices = JSON.parse(localStorage.getItem('cartPrices') || '{}');
-      if (price !== undefined) {
-        prices[productId] = price;
-        localStorage.setItem('cartPrices', JSON.stringify(prices));
-      }
-      
-      setCartInfo(calculateCartInfo(cartData, prices));
     };
 
-    window.addEventListener(CART_UPDATE_EVENT, handleCartUpdate as EventListener);
+    // Обновляем при монтировании
+    updateCartInfo();
+
+    // Подписываемся на событие обновления корзины
+    const handleCartUpdate = () => {
+      console.log('Cart update event received'); // Добавляем лог для отладки
+      updateCartInfo();
+    };
+
+    // Обновляем при изменении видимости страницы
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        updateCartInfo();
+      }
+    };
+
+    // Добавляем слушатели событий
+    window.addEventListener('cartUpdate', handleCartUpdate);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Периодически проверяем состояние корзины
+    const interval = setInterval(updateCartInfo, 1000);
 
     return () => {
-      window.removeEventListener(CART_UPDATE_EVENT, handleCartUpdate as EventListener);
+      window.removeEventListener('cartUpdate', handleCartUpdate);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(interval);
     };
   }, []);
 

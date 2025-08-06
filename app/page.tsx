@@ -14,7 +14,8 @@ import {
   HeartIcon,
   ClipboardDocumentIcon
 } from '@heroicons/react/24/outline';
-import FavoriteHeaderButton from './components/FavoriteHeaderButton';
+import Header from '@/app/components/Header';
+import FavoriteHeaderButton from '@/app/components/FavoriteHeaderButton';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CalendarDateRangeIcon } from '@heroicons/react/24/solid';
@@ -63,6 +64,7 @@ export default function Home() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [carouselImages, setCarouselImages] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [selectedLocation, setSelectedLocation] = useState(0); // 0 - Каракол (по умолчанию)
@@ -88,13 +90,19 @@ export default function Home() {
   // Загрузка товаров
   useEffect(() => {
     const fetchProducts = async () => {
+      setIsLoading(true);
       try {
-        const response = await fetch('/api/products/featured');
+        const response = await fetch('/api/products/popular');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
         const data = await response.json();
         setProducts(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Ошибка при загрузке товаров:', error);
         setProducts([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -185,6 +193,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
 
 
       {searchQuery ? (
@@ -225,18 +234,24 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 {t('popularProducts')}
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                {products.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    id={product.id}
-                    name={product.name}
-                    price={product.price}
-                    images={product.images}
-                    slug={product.slug}
-                  />
-                ))}
-              </div>
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">{t('loading')}</p>
+                </div>
+              ) : products.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                  {products.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">{t('noResults')}</p>
+                </div>
+              )}
               <div className="mt-8 text-center">
                 <Link
                   href="/catalog"

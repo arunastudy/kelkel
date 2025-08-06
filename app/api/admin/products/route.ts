@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
 import { uploadImage } from '@/app/utils/cloudinary';
+import { DEFAULT_PRODUCT_IMAGE } from '@/app/constants/products';
 
 const prisma = new PrismaClient();
-
-export const DEFAULT_PRODUCT_IMAGE = '/images/product-default.png';
 
 // GET /api/admin/products
 export async function GET(request: NextRequest) {
@@ -25,8 +24,8 @@ export async function GET(request: NextRequest) {
     // Поиск по названию или описанию
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
+        { name: { contains: search } },
+        { description: { contains: search } }
       ];
     }
     
@@ -221,4 +220,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

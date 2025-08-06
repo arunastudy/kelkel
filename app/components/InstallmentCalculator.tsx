@@ -17,15 +17,36 @@ export default function InstallmentCalculator({ price }: InstallmentCalculatorPr
   const [installments, setInstallments] = useState<InstallmentOption[]>([]);
   const [selectedOption, setSelectedOption] = useState<InstallmentOption | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchInstallments = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
+        
         const response = await fetch('/api/settings/installment');
         const data = await response.json();
-        setInstallments(data.installments || []);
+        
+        console.log('Raw installment data:', data); // Логируем сырые данные
+
+        if (!data.installments || !Array.isArray(data.installments)) {
+          throw new Error('Invalid installment data format');
+        }
+
+        // Преобразуем месяцы в числа для правильной сортировки
+        const sortedInstallments = [...data.installments].sort((a, b) => {
+          const monthsA = parseInt(a.months);
+          const monthsB = parseInt(b.months);
+          return monthsA - monthsB;
+        });
+
+        console.log('Sorted installments:', sortedInstallments); // Логируем отсортированные данные
+        
+        setInstallments(sortedInstallments);
       } catch (error) {
         console.error('Error fetching installments:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load installment options');
       } finally {
         setIsLoading(false);
       }
@@ -42,15 +63,17 @@ export default function InstallmentCalculator({ price }: InstallmentCalculatorPr
     );
   }
 
+  if (error) {
+    console.error('Installment calculator error:', error);
+    return null;
+  }
+
   if (installments.length === 0) {
     return null;
   }
 
-  const getMonthsNumber = (monthsRange: string): number => {
-    return parseInt(monthsRange.split('-')[0]);
-  };
-
   const handleOptionClick = (option: InstallmentOption) => {
+    console.log('Selected option:', option); // Логируем выбранную опцию
     if (selectedOption?.months === option.months) {
       setSelectedOption(null);
     } else {
@@ -61,14 +84,21 @@ export default function InstallmentCalculator({ price }: InstallmentCalculatorPr
   const calculateInstallment = () => {
     if (!selectedOption) return null;
 
+    const months = parseInt(selectedOption.months);
+    if (isNaN(months)) {
+      console.error('Invalid months value:', selectedOption.months);
+      return null;
+    }
+
     const totalAmount = price * (1 + selectedOption.percent / 100);
-    const monthlyPayment = totalAmount / getMonthsNumber(selectedOption.months);
+    const monthlyPayment = totalAmount / months;
     const markup = totalAmount - price;
 
     return {
       totalAmount,
       monthlyPayment,
-      markup
+      markup,
+      months
     };
   };
 
@@ -89,7 +119,7 @@ export default function InstallmentCalculator({ price }: InstallmentCalculatorPr
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
-            {option.months} {t('months')}
+            {parseInt(option.months)} {t('months')}
           </button>
         ))}
       </div>
@@ -102,13 +132,13 @@ export default function InstallmentCalculator({ price }: InstallmentCalculatorPr
           </div>
           
           <div className="flex justify-between text-gray-600">
-            <span>{t('markup')}:</span>
-            <span className="font-medium">+{calculations.markup.toLocaleString('ru-RU')} {t('currency')}</span>
+            <span>{t('markup')} ({selectedOption.percent}%):</span>
+            <span className="font-medium">+{Math.round(calculations.markup).toLocaleString('ru-RU')} {t('currency')}</span>
           </div>
           
           <div className="flex justify-between text-gray-900 font-medium">
             <span>{t('totalAmount')}</span>
-            <span>{calculations.totalAmount.toLocaleString('ru-RU')} {t('currency')}</span>
+            <span>{Math.round(calculations.totalAmount).toLocaleString('ru-RU')} {t('currency')}</span>
           </div>
           
           <div className="flex justify-between text-primary font-medium pt-2 border-t">
@@ -119,4 +149,4 @@ export default function InstallmentCalculator({ price }: InstallmentCalculatorPr
       )}
     </div>
   );
-} 
+}

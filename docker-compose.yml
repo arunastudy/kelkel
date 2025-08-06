@@ -1,0 +1,23 @@
+services:
+  app:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: "postgresql://neondb_owner:npg_rQmpVbwW3n1B@ep-polished-union-a2htbxvg-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+        TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+        IMGBB_API_KEY: ${IMGBB_API_KEY}
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://neondb_owner:npg_rQmpVbwW3n1B@ep-polished-union-a2htbxvg-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+      NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: your-cloud-name
+      CLOUDINARY_API_KEY: your-cloudinary-api-key
+      CLOUDINARY_API_SECRET: your-cloudinary-api-secret
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      IMGBB_API_KEY: ${IMGBB_API_KEY}
+    restart: always

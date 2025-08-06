@@ -5,7 +5,7 @@ import { XMarkIcon, MinusIcon, PlusIcon, ShoppingBagIcon } from '@heroicons/reac
 import Image from 'next/image';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
-import OrderForm from '../components/OrderForm';
+import OrderForm from '@/app/components/OrderForm';
 import { useLanguageContext } from '@/app/contexts/LanguageContext';
 
 // Определяем только необходимые поля для Product
@@ -268,4 +268,4 @@ export default function CartPage() {
       )}
     </div>
   );
-} 
+}

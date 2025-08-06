@@ -2,33 +2,41 @@
 const nextConfig = {
   output: 'standalone',
   images: {
-    unoptimized: true,
-    domains: ['localhost', 'vercel.app'],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.vercel.app',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-      }
-    ],
+    domains: ['res.cloudinary.com', 'wallpapers.com', 'i.ibb.co'],
   },
-  typescript: {
-    ignoreBuildErrors: true,
+  experimental: {
+    serverComponentsExternalPackages: ['cloudinary', '@prisma/client', 'prisma']
   },
-  swcMinify: true,
-  reactStrictMode: true,
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-      };
+  webpack: (config) => {
+    if (!config.resolve) {
+      config.resolve = {};
     }
+    if (!config.resolve.fallback) {
+      config.resolve.fallback = {};
+    }
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      stream: false,
+      crypto: false,
+      os: false,
+      http: false,
+      https: false,
+      zlib: false,
+      net: false,
+      tls: false,
+      child_process: false,
+      'cloudinary-core': false
+    };
     return config;
   },
-};
+  typescript: {
+    ignoreBuildErrors: true
+  },
+  env: {
+    IMGBB_API_KEY: process.env.IMGBB_API_KEY,
+  }
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

@@ -1,30 +1,23 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
-export async function GET(request: Request) {
+const prisma = new PrismaClient();
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const categoryId = searchParams.get('categoryId') || '';
-    const search = searchParams.get('search') || '';
+    const search = searchParams.get('q') || searchParams.get('search') || '';
+    const categoryId = searchParams.get('categoryId');
     const page = parseInt(searchParams.get('page') || '1');
-    const sortBy = searchParams.get('sortBy') || 'name';
-    const sortOrder = (searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc';
-    const filtersStr = searchParams.get('filters') || '{}';
-    const filters = JSON.parse(filtersStr);
-    const pageSize = 12;
+    const perPage = parseInt(searchParams.get('perPage') || '50');
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc';
 
-    // Создаем базовые условия для фильтрации
-    const where: Prisma.ProductWhereInput = {
-      isAvailable: true // Показываем только доступные товары
-    };
-
-    // Добавляем фильтр по категории
-    if (categoryId) {
-      where.categoryId = categoryId;
-    }
-
-    // Добавляем поиск по названию или описанию
+    const where: any = {};
+    
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -32,68 +25,38 @@ export async function GET(request: Request) {
       ];
     }
 
-    // Добавляем фильтры по цене
-    if (filters.price_range && filters.price_range.length > 0) {
-      const priceConditions = filters.price_range.map((range: string) => {
-        switch (range) {
-          case 'under_50000':
-            return { price: { lt: 50000 } };
-          case '50000_100000':
-            return {
-              AND: [
-                { price: { gte: 50000 } },
-                { price: { lte: 100000 } }
-              ]
-            };
-          case 'over_100000':
-            return { price: { gt: 100000 } };
-          default:
-            return null;
-        }
-      }).filter(Boolean);
-
-      if (priceConditions.length > 0) {
-        where.OR = priceConditions;
-      }
+    if (categoryId) {
+      where.categoryId = categoryId;
     }
 
-    // Получаем общее количество товаров
-    const total = await prisma.product.count({ where });
+    const skip = (page - 1) * perPage;
 
-    // Получаем товары с пагинацией
-    const products = await prisma.product.findMany({
-      where,
-      orderBy: { [sortBy]: sortOrder },
-      include: {
-        category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true
-          }
-        },
-        images: {
-          select: {
-            id: true,
-            url: true
-          }
+    const [total, products] = await Promise.all([
+      prisma.product.count({ where }),
+      prisma.product.findMany({
+        where,
+        orderBy: { [sortBy]: sortOrder },
+        skip,
+        take: perPage,
+        include: {
+          category: true,
+          images: true
         }
-      },
-      skip: (page - 1) * pageSize,
-      take: pageSize
-    });
+      })
+    ]);
 
     return NextResponse.json({
       products,
       total,
-      totalPages: Math.ceil(total / pageSize),
-      currentPage: page
+      page,
+      perPage,
+      totalPages: Math.ceil(total / perPage)
     });
   } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch products' },
+      { error: 'Ошибка при получении товаров' },
       { status: 500 }
     );
   }
-} 
+}

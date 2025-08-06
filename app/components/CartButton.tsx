@@ -19,15 +19,30 @@ export default function CartButton() {
         const cartItems = JSON.parse(cart) as CartData;
         const count = Object.values(cartItems).reduce((acc, quantity) => acc + quantity, 0);
         setItemsCount(count);
+      } else {
+        setItemsCount(0);
       }
     };
 
     updateCartCount();
+
+    // Слушаем изменения в cookie
+    const handleCookieChange = () => {
+      updateCartCount();
+    };
+
+    // Слушаем кастомное событие обновления корзины
+    const handleCartUpdate = () => {
+      updateCartCount();
+    };
+
+    document.addEventListener('visibilitychange', handleCookieChange);
+    window.addEventListener('cartUpdate', handleCartUpdate);
     
-    // Обновляем счетчик при изменении корзины
-    const interval = setInterval(updateCartCount, 1000);
-    
-    return () => clearInterval(interval);
+    return () => {
+      document.removeEventListener('visibilitychange', handleCookieChange);
+      window.removeEventListener('cartUpdate', handleCartUpdate);
+    };
   }, []);
 
   return (

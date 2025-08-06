@@ -8,10 +8,11 @@ import { useRouter } from 'next/navigation';
 interface Suggestion {
   text: string;
   category: string | null;
+  id?: string;
 }
 
 interface SearchBarProps {
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
   placeholder?: string;
   onSearch?: (query: string) => void;
@@ -22,25 +23,36 @@ export default function SearchBar({ value, onChange, placeholder, onSearch }: Se
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useLanguageContext();
   const router = useRouter();
-  const [localValue, setLocalValue] = useState(value);
+  const [localValue, setLocalValue] = useState(value || '');
 
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (!value.trim()) {
+      if (!localValue?.trim()) {
         setSuggestions([]);
+        setIsOpen(false);
         return;
       }
 
       setLoading(true);
       try {
-        const response = await fetch(`/api/products/suggestions?q=${encodeURIComponent(value)}`);
+        const response = await fetch(`/api/products/suggestions?q=${encodeURIComponent(localValue.trim())}&limit=5`);
         const data = await response.json();
-        setSuggestions(data.suggestions);
+
+        if (response.ok && data.suggestions && Array.isArray(data.suggestions)) {
+          setSuggestions(data.suggestions);
+          setIsOpen(data.suggestions.length > 0);
+        } else {
+          console.error('Error from API:', data.error || 'Unknown error');
+          setSuggestions([]);
+          setIsOpen(false);
+        }
       } catch (error) {
         console.error('Error fetching suggestions:', error);
         setSuggestions([]);
+        setIsOpen(false);
       } finally {
         setLoading(false);
       }
@@ -48,7 +60,7 @@ export default function SearchBar({ value, onChange, placeholder, onSearch }: Se
 
     const debounceTimeout = setTimeout(fetchSuggestions, 300);
     return () => clearTimeout(debounceTimeout);
-  }, [value]);
+  }, [localValue]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -62,27 +74,40 @@ export default function SearchBar({ value, onChange, placeholder, onSearch }: Se
   }, []);
 
   useEffect(() => {
-    setLocalValue(value);
+    setLocalValue(value || '');
+    // Если мы на странице поиска, устанавливаем фокус на поле ввода
+    if (window.location.pathname === '/search') {
+      inputRef.current?.focus();
+    }
   }, [value]);
 
   useEffect(() => {
     const debounceTimeout = setTimeout(() => {
-      if (localValue !== value) {
-        onChange(localValue);
-        // Перенаправляем на страницу поиска при вводе
-        if (localValue.trim()) {
-          router.push(`/search?q=${encodeURIComponent(localValue.trim())}`);
-        }
+      if (localValue.trim()) {
+        router.push(`/search?q=${encodeURIComponent(localValue.trim())}`);
+        // Возвращаем фокус на поле ввода после навигации
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 0);
+      } else if (window.location.pathname === '/search') {
+        router.push('/');
       }
     }, 300);
 
     return () => clearTimeout(debounceTimeout);
-  }, [localValue, value, onChange, router]);
+  }, [localValue, router]);
 
   const handleSuggestionClick = (suggestion: Suggestion) => {
-    onChange(suggestion.text);
+    const newValue = suggestion.text;
+    setLocalValue(newValue);
+    onChange(newValue);
     setIsOpen(false);
-    onSearch?.(suggestion.text);
+    if (suggestion.id) {
+      router.push(`/product/${suggestion.id}`);
+    } else {
+      router.push(`/search?q=${encodeURIComponent(newValue)}`);
+    }
+    inputRef.current?.focus();
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -103,12 +128,20 @@ export default function SearchBar({ value, onChange, placeholder, onSearch }: Se
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
           </div>
           <input
+            ref={inputRef}
             type="text"
             value={localValue}
-            onChange={(e) => setLocalValue(e.target.value)}
-            onFocus={() => setIsOpen(true)}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setLocalValue(newValue);
+              onChange(newValue);
+            }}
+            onFocus={() => {
+              setIsOpen(true);
+            }}
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary bg-white"
             placeholder={placeholder}
+            autoComplete="off"
           />
         </div>
 

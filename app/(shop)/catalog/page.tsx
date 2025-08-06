@@ -2,16 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import SearchBar from '@/app/components/SearchBar';
+import CategorySearchBar from '@/app/components/CategorySearchBar';
 import Pagination from '@/app/components/Pagination';
 import SortSelect from '@/app/components/SortSelect';
 import { useCategories } from '@/app/hooks/useCategories';
 import { useLanguageContext } from '@/app/contexts/LanguageContext';
-
-const sortOptions = [
-  { value: 'name-asc', label: 'По названию (А-Я)' },
-  { value: 'name-desc', label: 'По названию (Я-А)' }
-];
 
 export default function Catalog() {
   const [search, setSearch] = useState('');
@@ -38,7 +33,7 @@ export default function Catalog() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8">
           <div className="w-full sm:w-96">
-            <SearchBar
+            <CategorySearchBar
               value={search}
               onChange={(value) => {
                 setSearch(value);
@@ -123,4 +118,4 @@ export default function Catalog() {
       </div>
     </div>
   );
-} 
+}

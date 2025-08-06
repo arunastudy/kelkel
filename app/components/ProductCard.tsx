@@ -8,18 +8,28 @@ import { useLanguageContext } from '../contexts/LanguageContext';
 import Cookies from 'js-cookie';
 import FavoriteButton from './FavoriteButton';
 
+import { Product } from '../types';
+
 interface ProductCardProps {
-  id: string;
-  name: string;
-  price: number;
-  images: { url: string }[];
-  slug: string;
+  product: Product;
 }
 
-export default function ProductCard({ id, name, price, images, slug }: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
+  if (!product) {
+    return null;
+  }
+  
+  const { id, name, price, images } = product;
   const { t } = useLanguageContext();
   const [quantity, setQuantity] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Сбрасываем индекс изображения, если массив пустой или undefined
+  useEffect(() => {
+    if (!images || images.length === 0) {
+      setCurrentImageIndex(0);
+    }
+  }, [images]);
 
   // Загружаем состояние корзины при монтировании
   useEffect(() => {
@@ -58,14 +68,13 @@ export default function ProductCard({ id, name, price, images, slug }: ProductCa
       };
       localStorage.setItem('productDetails', JSON.stringify(productDetails));
 
+      // Сохраняем цену в localStorage
+      const prices = JSON.parse(localStorage.getItem('cartPrices') || '{}');
+      prices[id] = price;
+      localStorage.setItem('cartPrices', JSON.stringify(prices));
+
       // Отправляем событие обновления корзины
-      window.dispatchEvent(new CustomEvent('cartUpdate', {
-        detail: {
-          cartData: cart,
-          productId: id,
-          price
-        }
-      }));
+      window.dispatchEvent(new Event('cartUpdate'));
     }
   };
 
@@ -87,12 +96,20 @@ export default function ProductCard({ id, name, price, images, slug }: ProductCa
     <div className="group relative">
       <Link href={`/product/${id}`} className="block">
         <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100">
-          {images && images[currentImageIndex] && (
+          {images && images.length > 0 ? (
             <Image
-              src={images[currentImageIndex].url}
+              src={images[currentImageIndex]?.url || '/images/product-default.png'}
               alt={name}
               fill
               className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
+              sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
+            />
+          ) : (
+            <Image
+              src="/images/product-default.png"
+              alt={name}
+              fill
+              className="object-cover object-center"
               sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
             />
           )}
@@ -127,7 +144,7 @@ export default function ProductCard({ id, name, price, images, slug }: ProductCa
         </div>
         <div className="mt-4 space-y-2">
           <h3 className="text-sm font-medium text-gray-900 line-clamp-2">{name}</h3>
-          <p className="text-sm font-medium text-gray-900">{price.toLocaleString('ru-RU')} {t('currency')}</p>
+          <p className="text-sm font-medium text-gray-900">{price ? price.toLocaleString('ru-RU') : '0'} {t('currency')}</p>
         </div>
       </Link>
       <div className="pr-4 pb-4 mt-3 flex items-center justify-between">

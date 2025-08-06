@@ -1,44 +1,48 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
-export async function GET(request: Request) {
+const prisma = new PrismaClient();
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') || '';
+    const limit = parseInt(searchParams.get('limit') || '5');
 
-    if (!query) {
+    if (!query.trim()) {
       return NextResponse.json({ suggestions: [] });
     }
 
-    // Получаем уникальные названия товаров, которые содержат поисковый запрос
     const products = await prisma.product.findMany({
       where: {
         OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { description: { contains: query, mode: 'insensitive' } }
+          { name: { contains: query } },
+          { description: { contains: query } }
         ]
       },
-      select: {
-        name: true,
-        category: {
-          select: {
-            name: true
-          }
-        }
-      },
-      distinct: ['name'],
-      take: 10 // Ограничиваем количество подсказок
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        category: true
+      }
     });
 
-    // Форматируем результаты
+    // Форматируем результаты в формат подсказок
     const suggestions = products.map(product => ({
       text: product.name,
-      category: product.category?.name || null
+      category: product.category?.name || null,
+      id: product.id
     }));
 
     return NextResponse.json({ suggestions });
   } catch (error) {
-    console.error('Error fetching suggestions:', error);
-    return NextResponse.json({ error: 'Failed to fetch suggestions' }, { status: 500 });
+    console.error('Error fetching product suggestions:', error);
+    return NextResponse.json(
+      { error: 'Ошибка при получении подсказок', suggestions: [] },
+      { status: 500 }
+    );
   }
-} 
+}

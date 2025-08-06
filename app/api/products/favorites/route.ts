@@ -13,8 +13,7 @@ export async function POST(request: Request) {
       where: {
         id: {
           in: ids
-        },
-        isAvailable: true
+        }
       },
       select: {
         id: true,

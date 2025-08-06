@@ -102,6 +102,8 @@ export const translations = {
     relatedProducts: 'Похожие товары',
     share: 'Поделиться',
     noCategories: 'Категории не найдены',
+    productNotFound: 'Товар не найден',
+    productNotFoundDescription: 'К сожалению, запрашиваемый товар не найден. Возможно, он был удален или перемещен.',
 
     // Сортировка
     sortNameAZ: 'По названию (А-Я)',
@@ -132,10 +134,11 @@ export const translations = {
     addItemsToCart: 'Добавьте товары в корзину, чтобы оформить заказ',
     goToCatalog: 'Перейти в каталог',
     perUnit: 'за шт.',
-    productNotFound: 'Товар не найден',
 
     // Ошибки
     error: 'Произошла ошибка. Пожалуйста, попробуйте позже.',
+    errorOccurred: 'Произошла ошибка',
+    tryAgainLater: 'Пожалуйста, попробуйте позже',
 
     // Карта
     ourLocation: 'Мы на карте',
@@ -170,10 +173,10 @@ export const translations = {
     tryDifferentFilters: 'Попробуйте изменить параметры фильтрации',
 
     // Избранное
-    noFavorites: 'Тандалгандарда азырынча эч нерсе жок',
-    noFavoritesDesc: 'Келечектеги сатып алуулар үчүн товарларды тандалгандарга кошуңуз',
-    addToFavorites: 'Тандалгандарга кошуу',
-    removeFromFavorites: 'Тандалгандардан алып салуу',
+    noFavorites: 'В избранном пока ничего нет',
+    noFavoritesDesc: 'Добавляйте товары в избранное для будущих покупок',
+    addToFavorites: 'Добавить в избранное',
+    removeFromFavorites: 'Удалить из избранного',
     
     // Валидация телефона
     phoneRequired: 'Введите номер телефона',
@@ -186,6 +189,7 @@ export const translations = {
     markup: 'Наценка',
     totalAmount: 'Итого:',
     monthlyPayment: 'Ежемесячный платеж:',
+    enterSearchQuery: 'Введите поисковый запрос',
   },
   ky: {
     // Навигация
@@ -290,6 +294,8 @@ export const translations = {
     relatedProducts: 'Окшош товарлар',
     share: 'Бөлүшүү',
     noCategories: 'Категориялар табылган жок',
+    productNotFound: 'Товар табылган жок',
+    productNotFoundDescription: 'Тилекке каршы, сурап жаткан товар табылган жок. Балким ал өчүрүлгөн же жылдырылган.',
 
     // Сортировка
     sortNameAZ: 'Аты боюнча (А-Я)',
@@ -320,10 +326,11 @@ export const translations = {
     addItemsToCart: 'Буйрутма берүү үчүн товарларды себетке кошуңуз',
     goToCatalog: 'Каталогго өтүү',
     perUnit: 'даанасы',
-    productNotFound: 'Товар табылган жок',
 
     // Ошибки
     error: 'Ката кетти. Сураныч, бир аздан кийин кайра аракет кылыңыз.',
+    errorOccurred: 'Ката кетти',
+    tryAgainLater: 'Сураныч, бир аздан кийин кайра аракет кылыңыз',
 
     // Карта
     ourLocation: 'Биз картада',
@@ -374,5 +381,6 @@ export const translations = {
     markup: 'Кошумча баа',
     totalAmount: 'Жалпы:',
     monthlyPayment: 'Айлык төлөм:',
+    enterSearchQuery: 'Издөө сөзүн киргизиңиз',
   }
-}; 
+};
