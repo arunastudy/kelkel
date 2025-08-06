@@ -5,11 +5,13 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Копируем файлы package.json и package-lock.json
+# Копируем файлы package.json и prisma
 COPY package.json ./
+COPY prisma ./prisma/
 
 # Устанавливаем зависимости
-RUN npm install
+RUN npm install --ignore-scripts
+RUN npx prisma generate
 
 # Сборка приложения
 FROM base AS builder
@@ -17,6 +19,7 @@ WORKDIR /app
 
 # Копируем зависимости из предыдущего этапа
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/prisma ./prisma
 COPY . .
 
 # Устанавливаем дополнительные зависимости для Tailwind
@@ -46,10 +49,12 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # Устанавливаем только production зависимости
 COPY package.json ./
-RUN npm install --omit=dev
+RUN npm install --omit=dev --ignore-scripts
 
 # Добавляем пользователя для безопасности
 RUN addgroup --system --gid 1001 nodejs
