@@ -6,10 +6,10 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Копируем файлы package.json и package-lock.json
-COPY package.json package-lock.json ./
+COPY package.json ./
 
 # Устанавливаем зависимости
-RUN npm ci
+RUN npm install
 
 # Сборка приложения
 FROM base AS builder
@@ -48,8 +48,8 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 
 # Устанавливаем только production зависимости
-COPY package.json package-lock.json ./
-RUN npm ci --only=production
+COPY package.json ./
+RUN npm install --omit=dev
 
 # Добавляем пользователя для безопасности
 RUN addgroup --system --gid 1001 nodejs
