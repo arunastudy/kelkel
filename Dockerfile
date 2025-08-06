@@ -9,8 +9,10 @@ WORKDIR /app
 COPY package.json ./
 COPY prisma ./prisma/
 
-# Устанавливаем зависимости
-RUN npm install --ignore-scripts
+# Устанавливаем все зависимости (включая devDependencies)
+RUN npm install --production=false
+
+# Генерируем Prisma Client
 RUN npx prisma generate
 
 # Сборка приложения
@@ -21,9 +23,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/prisma ./prisma
 COPY . .
-
-# Устанавливаем дополнительные зависимости для Tailwind
-RUN npm install -D @tailwindcss/forms
 
 # Переменные окружения для сборки
 ARG DATABASE_URL
@@ -52,9 +51,9 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
-# Устанавливаем только production зависимости
+# Копируем package.json и устанавливаем только production зависимости
 COPY package.json ./
-RUN npm install --omit=dev --ignore-scripts
+RUN npm install --omit=dev
 
 # Добавляем пользователя для безопасности
 RUN addgroup --system --gid 1001 nodejs
