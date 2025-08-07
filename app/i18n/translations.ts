@@ -190,6 +190,10 @@ export const translations = {
     totalAmount: 'Итого:',
     monthlyPayment: 'Ежемесячный платеж:',
     enterSearchQuery: 'Введите поисковый запрос',
+    
+    // Разработчик
+    developedBy: 'Сайт разработан by',
+    developerName: 'Ariet',
   },
   ky: {
     // Навигация
@@ -382,5 +386,9 @@ export const translations = {
     totalAmount: 'Жалпы:',
     monthlyPayment: 'Айлык төлөм:',
     enterSearchQuery: 'Издөө сөзүн киргизиңиз',
+    
+    // Разработчик
+    developedBy: 'Сайт иштеп чыккан',
+    developerName: 'Ariet',
   }
 };
