@@ -1,4 +1,5 @@
 import './globals.css';
+import './styles/scrollbar.css';
 import { Providers } from './providers';
 import FloatingCart from './components/FloatingCart';
 import { Metadata } from 'next';

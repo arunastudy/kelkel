@@ -19,7 +19,8 @@ export function useCategories(
   search: string = '',
   page: number = 1,
   sortBy: string = 'name',
-  sortOrder: 'asc' | 'desc' = 'asc'
+  sortOrder: 'asc' | 'desc' = 'asc',
+  limit: number = 9
 ) {
   const [data, setData] = useState<CategoriesResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +34,8 @@ export function useCategories(
           search,
           page: page.toString(),
           sortBy,
-          sortOrder
+          sortOrder,
+          limit: limit.toString()
         });
 
         const response = await fetch(`/api/categories?${params}`);
@@ -65,7 +67,7 @@ export function useCategories(
     };
 
     fetchCategories();
-  }, [search, page, sortBy, sortOrder]);
+  }, [search, page, sortBy, sortOrder, limit]);
 
   return { data, isLoading, error };
 } 

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const sortBy = searchParams.get('sortBy') || 'name';
     const sortOrder = (searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc';
-    const limit = 9; // количество элементов на странице
+    const limit = parseInt(searchParams.get('limit') || '9'); // получаем лимит из параметров запроса
 
     // Подсчитываем общее количество категорий
     const total = await prisma.category.count({

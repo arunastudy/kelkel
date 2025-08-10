@@ -13,6 +13,7 @@ import { useLanguageContext } from '../contexts/LanguageContext';
 import { LanguageToggle } from './LanguageToggle';
 import SearchBar from './SearchBar';
 import FavoriteHeaderButton from './FavoriteHeaderButton';
+import CategoryTags from './CategoryTags';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -172,6 +173,7 @@ export default function Header() {
             </div>
           </div>
         </div>
+        <CategoryTags />
       </nav>
 
       {/* Мобильное меню */}
