@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguageContext } from '@/app/contexts/LanguageContext';
+import { IoInformationCircle } from 'react-icons/io5';
 
 interface InstallmentOption {
   months: string;
@@ -18,6 +19,40 @@ export default function InstallmentCalculator({ price }: InstallmentCalculatorPr
   const [selectedOption, setSelectedOption] = useState<InstallmentOption | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const tooltipTimerRef = useRef<NodeJS.Timeout | undefined>();
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => setShowTooltip(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
+        setShowTooltip(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleTooltipClick = () => {
+    setShowTooltip(true);
+    
+    // Clear existing timer if any
+    if (tooltipTimerRef.current) {
+      clearTimeout(tooltipTimerRef.current);
+    }
+
+    // Set new timer
+    tooltipTimerRef.current = setTimeout(() => {
+      setShowTooltip(false);
+    }, 15000);
+  };
 
   useEffect(() => {
     const fetchInstallments = async () => {
@@ -106,7 +141,23 @@ export default function InstallmentCalculator({ price }: InstallmentCalculatorPr
 
   return (
     <div className="mt-6 p-4 border border-gray-200 rounded-lg">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">{t('installmentCalculator')}</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-medium text-gray-900">{t('installmentCalculator')}</h3>
+        <div className="relative" ref={tooltipRef}>
+          <button
+            onClick={handleTooltipClick}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Информация о рассрочке"
+          >
+            <IoInformationCircle size={24} />
+          </button>
+          {showTooltip && (
+            <div className="absolute right-0 top-8 w-64 p-3 bg-white border border-gray-200 rounded-lg shadow-lg text-sm text-gray-600 z-10">
+              Цены в рассрочку могут отличаться и меняться в зависимости от условий банка.
+            </div>
+          )}
+        </div>
+      </div>
       
       <div className="grid grid-cols-2 gap-4 mb-4">
         {installments.map((option) => (
@@ -131,11 +182,6 @@ export default function InstallmentCalculator({ price }: InstallmentCalculatorPr
             <span className="font-medium">{price.toLocaleString('ru-RU')} {t('currency')}</span>
           </div>
           
-          <div className="flex justify-between text-gray-600">
-            <span>{t('markup')} ({selectedOption.percent}%):</span>
-            <span className="font-medium">+{Math.round(calculations.markup).toLocaleString('ru-RU')} {t('currency')}</span>
-          </div>
-          
           <div className="flex justify-between text-gray-900 font-medium">
             <span>{t('totalAmount')}</span>
             <span>{Math.round(calculations.totalAmount).toLocaleString('ru-RU')} {t('currency')}</span>
@@ -143,7 +189,7 @@ export default function InstallmentCalculator({ price }: InstallmentCalculatorPr
           
           <div className="flex justify-between text-primary font-medium pt-2 border-t">
             <span>{t('monthlyPayment')}</span>
-            <span>{Math.ceil(calculations.monthlyPayment).toLocaleString('ru-RU')} {t('currency')}</span>
+            <span>{calculations.monthlyPayment.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} {t('currency')}</span>
           </div>
         </div>
       )}

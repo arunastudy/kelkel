@@ -412,16 +412,16 @@ export default function Home() {
               <div className="flex items-center">
                 <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
                   <Image
-                    src="/images/директор.jpg"
-                    alt="Эльнура"
+                    src="/images/технолог.png"
+                    alt="Рамис"
                     width={64}
                     height={64}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg group-hover:text-white">Эльнура</h3>
-                  <p className="text-gray-600 group-hover:text-white/80">Директор</p>
+                  <h3 className="font-bold text-lg group-hover:text-white">Рамис</h3>
+                  <p className="text-gray-600 group-hover:text-white/80">Технолог</p>
                 </div>
               </div>
             </div>
