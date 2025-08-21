@@ -140,7 +140,7 @@ export default function ProductsPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/admin/categories'); // Запрашиваем все категории
+      const response = await fetch('/api/admin/categories?all=true'); // Запрашиваем все категории
       if (!response.ok) {
         throw new Error('Ошибка при загрузке категорий');
       }

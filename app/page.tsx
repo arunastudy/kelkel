@@ -26,14 +26,7 @@ import ImageCarousel from './components/ImageCarousel';
 import ProductCard from './components/ProductCard';
 import { prisma } from '../lib/prisma';
 import SearchBar from '@/app/components/SearchBar';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  images: { url: string }[];
-  slug: string;
-}
+import { Product } from './types';
 
 interface FAQItem {
   question: string;
@@ -204,15 +197,11 @@ export default function Home() {
               {t('searchResults')}
             </h2>
             {searchResults.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 {searchResults.map((product) => (
                   <ProductCard
                     key={product.id}
-                    id={product.id}
-                    name={product.name}
-                    price={product.price}
-                    images={product.images}
-                    slug={product.slug}
+                    product={product}
                   />
                 ))}
               </div>
@@ -239,7 +228,7 @@ export default function Home() {
                   <p className="text-gray-500">{t('loading')}</p>
                 </div>
               ) : products.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                   {products.map((product) => (
                     <ProductCard
                       key={product.id}

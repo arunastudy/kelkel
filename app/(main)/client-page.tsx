@@ -8,14 +8,7 @@ import CategoriesBar from '@/app/components/CategoriesBar';
 import ImageCarousel from '@/app/components/ImageCarousel';
 import ProductCard from '@/app/components/ProductCard';
 import SearchBar from '@/app/components/SearchBar';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  images: { url: string }[];
-  slug: string;
-}
+import { Product } from '@/app/types';
 
 export default function ClientPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -63,15 +56,11 @@ export default function ClientPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <CategoriesBar />
         <ImageCarousel images={carouselImages} />
-        <div className="mt-8 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+        <div className="mt-8 grid grid-cols-2 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
           {products.map((product) => (
             <ProductCard 
               key={product.id}
-              id={product.id}
-              name={product.name}
-              price={product.price}
-              images={product.images}
-              slug={product.slug}
+              product={product}
             />
           ))}
         </div>

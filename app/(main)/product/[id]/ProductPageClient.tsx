@@ -152,7 +152,7 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
             <div className="flex items-center w-full max-w-md">
               {quantity > 0 ? (
                 <div className="flex items-center w-full">
-                  <div className="flex items-center justify-between p-2 h-10 rounded-lg gradient-primary text-white flex-grow mr-2">
+                  <div className="flex items-center justify-between p-2 h-12 sm:h-10 rounded-lg gradient-primary text-white flex-grow mr-2">
                     <button
                       onClick={() => updateCart(-1)}
                       className="p-1 rounded-full hover:bg-white/10 transition-colors"
@@ -184,12 +184,12 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                 <div className="flex items-center w-full">
                   <button 
                     onClick={() => updateCart(1)}
-                    className="bg-primary text-white h-10 px-6 rounded-lg hover:bg-primary-dark transition-colors duration-200 flex-grow mr-2 flex items-center justify-center space-x-2"
+                    className="bg-primary text-white h-12 sm:h-10 px-3 sm:px-6 rounded-lg hover:bg-primary-dark transition-colors duration-200 flex-grow mr-2 flex items-center justify-center space-x-1 sm:space-x-2"
                   >
                     <ShoppingCartIcon className="h-4 w-4" />
-                    <span className="text-sm">{t('addToCart')}</span>
+                    <span className="text-xs sm:text-sm font-medium">{t('addToCart')}</span>
                   </button>
-                  <div className="w-10 flex-shrink-0">
+                  <div className="w-12 sm:w-10 flex-shrink-0">
                     <FavoriteButton productId={initialProduct.id} />
                   </div>
                 </div>
